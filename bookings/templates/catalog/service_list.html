@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Services - Hair by Lasheka</title>
+    <style>
+        /* Mobile-First Vanilla CSS */
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #d4af37; /* A nice salon gold */
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        /* Responsive Grid Layout */
+        .service-container {
+            display: grid;
+            grid-template-columns: 1fr; /* Defaults to 1 column for mobile */
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Expands to 2 or 3 columns on larger screens */
+        @media (min-width: 768px) {
+            .service-container {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+
+        .service-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .service-title {
+            font-size: 1.25rem;
+            margin: 0 0 10px 0;
+            color: var(--primary-color);
+        }
+
+        .service-desc {
+            font-size: 0.95rem;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .service-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #eee;
+            padding-top: 15px;
+        }
+
+        .service-price {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .service-duration {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .book-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 10px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .book-btn:hover {
+            background-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Our Services</h1>
+        <p>Find the perfect style and book your appointment.</p>
+    </header>
+
+    <div class="service-container">
+        {% for service in services %}
+        <div class="service-card">
+            <h2 class="service-title">{{ service.name }}</h2>
+            
+            {% if service.description %}
+                <p class="service-desc">{{ service.description }}</p>
+            {% else %}
+                <p class="service-desc">No description available.</p>
+            {% endif %}
+            
+            <div class="service-details">
+                <span class="service-price">${{ service.price|floatformat:2 }}</span>
+                <span class="service-duration">⏱ {{ service.duration_minutes }} mins</span>
+            </div>
+            
+            <button class="book-btn" onclick="alert('Booking feature coming soon!')">Book Now</button>
+        </div>
+        {% empty %}
+        <div class="service-card">
+            <p>No services are currently available. Please check back later!</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</body>
+</html>

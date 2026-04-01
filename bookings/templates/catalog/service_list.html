@@ -20,27 +20,20 @@
 
         body {
             font-family: var(--body-font);
-            background-color: var(--bg-color);
+            /* Stretches the solid brown to 25% of the screen, then smoothly fades to off-white by 85% */
+            background: linear-gradient(to bottom, #3A2618 0%, #3A2618 25%, var(--bg-color) 85%);
+            background-attachment: fixed;
+            min-height: 100vh;
             color: var(--text-main);
             margin: 0;
             padding: 0;
             line-height: 1.6;
         }
 
-        /* 2. The Hero Section (Matches the top of your image) */
         .hero-section {
             text-align: center;
             padding: 80px 20px 40px;
-            background-color: var(--bg-color);
-        }
-
-        .hero-subtitle {
-            color: var(--accent-gold);
-            font-size: 0.85rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            font-weight: 700;
-            margin-bottom: 10px;
+            background-color: transparent; /* Lets the gradient show through */
         }
 
         .hero-title {
@@ -48,7 +41,7 @@
             font-size: 3.5rem;
             font-weight: 700;
             margin: 0 0 15px 0;
-            color: var(--text-main);
+            color: #FFFFFF; /* Changed to white for contrast */
         }
 
         .hero-tagline {
@@ -56,6 +49,7 @@
             font-weight: 300;
             max-width: 600px;
             margin: 0 auto;
+            color: #E8E1D9; /* A soft off-white for readability */
         }
 
         /* 3. The Navigation Bar */
@@ -71,13 +65,13 @@
             font-family: var(--heading-font);
             font-weight: 700;
             font-size: 1.5rem;
-            color: var(--text-main);
+            color: #FFFFFF; /* Changed to white */
             text-decoration: none;
         }
 
         .nav-links a {
             font-family: var(--body-font);
-            color: var(--text-main);
+            color: #FFFFFF; /* Changed to white */
             text-decoration: none;
             margin-left: 25px;
             font-size: 0.9rem;
@@ -89,7 +83,8 @@
         }
 
         .btn-register {
-            border: 1px solid var(--text-main);
+            border: 1px solid var(--accent-gold);
+            color: var(--accent-gold) !important; /* Makes the register button pop */
             padding: 8px 18px;
             border-radius: 25px;
         }
@@ -185,10 +180,10 @@
         <a href="/" class="nav-brand">Hair By Lasheka</a>
         <div class="nav-links">
             {% if user.is_authenticated %}
-                <span style="margin-right: 15px;">Welcome, {{ user.username }}</span>
+                <span style="margin-right: 15px; color: #FFFFFF;">Welcome, {{ user.username }}</span>
                 <form action="{% url 'logout' %}" method="post" style="display: inline;">
                     {% csrf_token %}
-                    <button type="submit" style="background: none; border: none; font-family: var(--body-font); font-size: 0.9rem; cursor: pointer; color: var(--text-main);">Logout</button>
+                    <button type="submit" style="background: none; border: none; font-family: var(--body-font); font-size: 0.9rem; cursor: pointer; color: var(--accent-gold);">Logout</button>
                 </form>
             {% else %}
                 <a href="{% url 'login' %}">Login</a>

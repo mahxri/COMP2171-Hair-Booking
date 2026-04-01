@@ -303,9 +303,9 @@
             
             {% if service.is_active %}
                 {% if user.is_authenticated %}
-                    <button class="book-btn" onclick="alert('Booking system coming soon!')">Book Now</button>
+                    <a href="{% url 'book_service' service.id %}" class="book-btn">Book Now</a>
                 {% else %}
-                    <a href="{% url 'login' %}?next=/" class="book-btn">Log in to Book</a>
+                    <a href="{% url 'login' %}?next={% url 'book_service' service.id %}" class="book-btn">Log in to Book</a>
                 {% endif %}
             {% else %}
                 <button class="book-btn" disabled>Currently Unavailable</button>

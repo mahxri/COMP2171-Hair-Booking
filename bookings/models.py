@@ -15,25 +15,30 @@ class Service(models.Model):
         return self.name
 
 # This prepares you for Feature 1.0 and Feature 4.0
+from datetime import datetime, timedelta
+
 class Appointment(models.Model):
-    # models.RESTRICT prevents deleting a service that has an active booking attached to it
-    service = models.ForeignKey(Service, on_delete=models.RESTRICT)
-    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='appointments')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    date = models.DateField()
+    start_time = models.TimeField()
+    end_time = models.TimeField(blank=True, null=True)
     
-    appointment_date = models.DateField()
-    appointment_time = models.TimeField()
-
-    STATUS_CHOICES = [
-        ('CONFIRMED', 'Confirmed'),
-        ('CANCELLED', 'Cancelled'),
-        ('COMPLETED', 'Completed'),
-    ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='CONFIRMED')
-
-    # Allows clients to input allergies/sensitivities for safety compliance
-    client_notes_allergies = models.TextField(blank=True, null=True)
+    # --- NEW FIELDS ---
+    phone_number = models.CharField(max_length=10) 
+    special_requests = models.TextField(blank=True, null=True) # Optional field
+    # ------------------
     
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def save(self, *args, **kwargs):
+        # (Keep your existing automatic end_time calculation here!)
+        if self.start_time and self.service:
+            start_dt = datetime.combine(datetime.today(), self.start_time)
+            end_dt = start_dt + timedelta(minutes=self.service.duration_minutes)
+            self.end_time = end_dt.time()
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"{self.client.username} - {self.service.name} on {self.appointment_date}"
+        return f"{self.user.username} - {self.service.name} on {self.date}"
+    

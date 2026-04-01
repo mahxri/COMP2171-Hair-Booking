@@ -11,5 +11,6 @@ class ServiceAdmin(admin.ModelAdmin):
 # This registers the Appointment model for when you build that feature later
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
-    list_display = ('client', 'service', 'appointment_date', 'appointment_time', 'status')
-    list_filter = ('status', 'appointment_date')
+    # Added phone_number and special_requests so they show up as columns!
+    list_display = ('user', 'service', 'date', 'start_time', 'end_time', 'phone_number', 'special_requests')
+    list_filter = ('date', 'service')

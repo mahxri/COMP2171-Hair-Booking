@@ -8,6 +8,8 @@ urlpatterns = [
     
     # The Catalog is moved to /services/
     path('services/', views.service_catalog, name='catalog'),
+
+    path('book/<int:service_id>/', views.book_service, name='book_service'),
     
     # Authentication Routes (unchanged)
     path('register/', views.register_request, name='register'),

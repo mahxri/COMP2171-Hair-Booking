@@ -1,54 +1,116 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Services - Hair by Lasheka</title>
     <style>
-        /* Mobile-First Vanilla CSS */
+        /* 1. The Color Palette & Font Setup */
         :root {
-            --primary-color: #2c3e50;
-            --accent-color: #d4af37; /* A nice salon gold */
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
+            --bg-color: #FBF8F1; /* Warm off-white */
+            --text-main: #2C241B; /* Deep brown/charcoal instead of harsh black */
+            --accent-gold: #B88A44; /* The gold from the subheadings */
+            --card-bg: #FFFFFF;
+            --heading-font: 'Playfair Display', serif;
+            --body-font: 'Lato', sans-serif;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: var(--body-font);
             background-color: var(--bg-color);
-            color: var(--primary-color);
+            color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 0;
             line-height: 1.6;
         }
 
-        header {
+        /* 2. The Hero Section (Matches the top of your image) */
+        .hero-section {
             text-align: center;
-            margin-bottom: 40px;
+            padding: 80px 20px 40px;
+            background-color: var(--bg-color);
         }
 
-        /* Responsive Grid Layout */
-        .service-container {
+        .hero-subtitle {
+            color: var(--accent-gold);
+            font-size: 0.85rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .hero-title {
+            font-family: var(--heading-font);
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin: 0 0 15px 0;
+            color: var(--text-main);
+        }
+
+        .hero-tagline {
+            font-size: 1.1rem;
+            font-weight: 300;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* 3. The Navigation Bar */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            background-color: transparent;
+        }
+
+        .nav-brand {
+            font-family: var(--heading-font);
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text-main);
+            text-decoration: none;
+        }
+
+        .nav-links a {
+            font-family: var(--body-font);
+            color: var(--text-main);
+            text-decoration: none;
+            margin-left: 25px;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent-gold);
+        }
+
+        .btn-register {
+            border: 1px solid var(--text-main);
+            padding: 8px 18px;
+            border-radius: 25px;
+        }
+
+        /* 4. The Service Cards */
+        .catalog-container {
             display: grid;
-            grid-template-columns: 1fr; /* Defaults to 1 column for mobile */
-            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            padding: 40px 5%;
             max-width: 1200px;
             margin: 0 auto;
         }
 
-        /* Expands to 2 or 3 columns on larger screens */
-        @media (min-width: 768px) {
-            .service-container {
-                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            }
-        }
-
         .service-card {
-            background-color: var(--card-bg);
-            border-radius: 8px;
-            padding: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: transform 0.2s ease;
+            background: var(--card-bg);
+            border-radius: 12px; /* Soft rounded corners */
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.03); /* Very subtle shadow */
+            transition: transform 0.3s ease;
+            text-align: left;
         }
 
         .service-card:hover {
@@ -56,14 +118,14 @@
         }
 
         .service-title {
-            font-size: 1.25rem;
+            font-family: var(--heading-font);
+            font-size: 1.8rem;
             margin: 0 0 10px 0;
-            color: var(--primary-color);
         }
 
         .service-desc {
             font-size: 0.95rem;
-            color: #666;
+            color: #555;
             margin-bottom: 20px;
         }
 
@@ -71,72 +133,103 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 25px;
             border-top: 1px solid #eee;
             padding-top: 15px;
         }
 
         .service-price {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--accent-color);
+            font-family: var(--heading-font);
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--accent-gold);
         }
 
-        .service-duration {
-            font-size: 0.85rem;
-            color: #888;
-        }
-
+        /* 5. The Booking Button */
         .book-btn {
-            display: block;
             width: 100%;
-            text-align: center;
-            background-color: var(--primary-color);
+            background-color: var(--text-main);
             color: white;
-            padding: 10px;
-            margin-top: 15px;
             border: none;
-            border-radius: 5px;
+            padding: 12px;
+            font-family: var(--body-font);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
             cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.3s ease;
+            display: block;
+            text-align: center;
             text-decoration: none;
-            font-weight: bold;
         }
 
         .book-btn:hover {
-            background-color: var(--accent-color);
+            background-color: var(--accent-gold);
+        }
+
+        .service-card.inactive {
+            opacity: 0.6;
+            background-color: #f9f9f9;
+        }
+
+        .book-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            color: #666;
         }
     </style>
 </head>
 <body>
-
-    <header>
-        <h1>Our Services</h1>
-        <p>Find the perfect style and book your appointment.</p>
-    </header>
-
-    <div class="service-container">
-        {% for service in services %}
-        <div class="service-card">
-            <h2 class="service-title">{{ service.name }}</h2>
-            
-            {% if service.description %}
-                <p class="service-desc">{{ service.description }}</p>
+    <nav class="nav-bar">
+        <a href="/" class="nav-brand">Hair By Lasheka</a>
+        <div class="nav-links">
+            {% if user.is_authenticated %}
+                <span style="margin-right: 15px;">Welcome, {{ user.username }}</span>
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" style="background: none; border: none; font-family: var(--body-font); font-size: 0.9rem; cursor: pointer; color: var(--text-main);">Logout</button>
+                </form>
             {% else %}
-                <p class="service-desc">No description available.</p>
+                <a href="{% url 'login' %}">Login</a>
+                <a href="{% url 'register' %}" class="btn-register">Register</a>
             {% endif %}
-            
+        </div>
+    </nav>
+
+    <div class="hero-section">
+        <div class="hero-subtitle">Jamaica • Antigua</div>
+        <h1 class="hero-title">Service Menu</h1>
+        <p class="hero-tagline">Natural hair care & protective styling, rooted in Caribbean beauty.</p>
+    </div>
+
+    <div class="catalog-container">
+        {% for service in services %}
+        <div class="service-card {% if not service.is_active %}inactive{% endif %}">
+            <h2 class="service-title">{{ service.name }}</h2>
+            <p class="service-desc">
+                {% if service.description %}{{ service.description }}{% else %}No description available.{% endif %}
+            </p>
             <div class="service-details">
                 <span class="service-price">${{ service.price|floatformat:2 }}</span>
-                <span class="service-duration">⏱ {{ service.duration_minutes }} mins</span>
+                <span style="font-size: 0.9rem; color: #777;">⏱ {{ service.duration_minutes }} mins</span>
             </div>
             
-            <button class="book-btn" onclick="alert('Booking feature coming soon!')">Book Now</button>
+            {% if service.is_active %}
+                {% if user.is_authenticated %}
+                    <button class="book-btn" onclick="alert('Booking system coming soon!')">Book Now</button>
+                {% else %}
+                    <a href="{% url 'login' %}?next=/" class="book-btn">Log in to Book</a>
+                {% endif %}
+            {% else %}
+                <button class="book-btn" disabled>Currently Unavailable</button>
+            {% endif %}
         </div>
         {% empty %}
-        <div class="service-card">
+        <div class="service-card" style="grid-column: 1 / -1; text-align: center;">
             <p>No services are currently available. Please check back later!</p>
         </div>
         {% endfor %}
     </div>
-
 </body>
 </html>

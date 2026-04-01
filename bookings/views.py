@@ -3,6 +3,9 @@ from .models import Service
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 
+def home(request):
+    return render(request, 'catalog/home.html')
+
 # 1. Your original Service Catalog view
 def service_catalog(request):
     # Fetch ALL services, both active and inactive

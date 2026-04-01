@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hair By Lasheka | Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FBF8F1; 
+            --text-main: #2C241B; 
+            --text-light: #554d44;
+            --accent-gold: #B88A44; 
+            --heading-font: 'Playfair Display', serif;
+            --body-font: 'Lato', sans-serif;
+            /* Add this new line: */
+            --signature-font: 'Great Vibes', cursive; 
+        }
+
+        body {
+            font-family: var(--body-font);
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 0;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* --- 1. HERO SECTION (Dark Mocha Gradient) --- */
+        .hero-wrapper {
+            background: linear-gradient(to bottom, #3A2618 0%, #2a1a10 100%);
+            min-height: 85vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; }
+        .nav-brand { 
+            font-family: var(--signature-font); 
+            font-weight: 400; /* Un-bolded for a natural signature look */
+            font-size: 2.5rem; /* Increased size so it's readable */
+            color: #FFFFFF; 
+            text-decoration: none; 
+        }
+        /* --- GLASSMORPHISM NAVBAR BUTTONS --- */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 15px; 
+        }
+
+        .nav-glass-btn {
+            background: rgba(255, 255, 255, 0.08); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.15); 
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); 
+            color: #FFFFFF !important;
+            font-family: var(--body-font);
+            font-size: 0.9rem;
+            text-decoration: none;
+            padding: 10px 24px;
+            border-radius: 50px; 
+            transition: all 0.3s ease;
+        }
+
+        /* --- USER DROPDOWN MENU --- */
+        .user-menu-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 120%; /* Pushes it just below the Welcome button */
+            right: 0;
+            background: rgba(44, 36, 27, 0.85); /* Dark mocha glass */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 8px;
+            min-width: 130px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            
+            /* Hidden by default */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        /* The class we will trigger with JavaScript */
+        .user-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* The Vibrant Red Logout Button */
+        .logout-btn {
+            width: 100%;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: #FFFFFF;
+            font-family: var(--body-font);
+            font-size: 0.95rem;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #FF3B30; /* Vibrant Apple Red */
+            color: #FFFFFF;
+            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4); /* Glowing red shadow */
+        }
+
+        .nav-glass-btn:hover {
+            background: rgba(255, 255, 255, 0.18); 
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            color: var(--accent-gold) !important;
+        }
+
+        .nav-glass-btn.primary {
+            background: rgba(184, 138, 68, 0.2); 
+            border: 1px solid rgba(184, 138, 68, 0.4);
+        }
+        
+        .nav-glass-btn.primary:hover {
+            background: rgba(184, 138, 68, 0.35);
+        }
+
+
+        .home-hero-content {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 20px;
+        }
+
+        .home-title { font-family: var(--heading-font); font-size: 4.5rem; color: #FFFFFF; margin: 15px 0; line-height: 1.1; }
+        .home-subtitle { font-size: 1.2rem; color: #E8E1D9; max-width: 600px; margin-bottom: 40px; font-weight: 300; }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: var(--accent-gold);
+            color: #FFFFFF;
+            padding: 15px 40px;
+            font-family: var(--body-font);
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-decoration: none;
+            border-radius: 30px;
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+        .cta-button:hover { background-color: #9A7338; transform: translateY(-3px); color: #FFFFFF; }
+
+        /* --- REUSABLE SECTION STYLES --- */
+        .section-container { max-width: 1200px; margin: 0 auto; padding: 100px 5%; }
+        .section-tagline { color: var(--accent-gold); letter-spacing: 3px; font-size: 0.85rem; text-transform: uppercase; font-weight: 700; margin-bottom: 15px; }
+        .section-heading { font-family: var(--heading-font); font-size: 3rem; margin-top: 0; color: var(--text-main); }
+
+        /* --- 2. OUR STORY SECTION --- */
+        .story-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+        .story-image-placeholder {
+            width: 100%;
+            height: 500px;
+            background: linear-gradient(45deg, #d2c5b3, #e8dfd1);
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #a89f91;
+        }
+        .story-text p { font-size: 1.1rem; color: var(--text-light); margin-bottom: 20px; }
+        .story-text strong { color: var(--text-main); }
+
+        /* --- 3. OUR SPECIALTIES SECTION --- */
+        .specialties-section { background-color: #F8F4EC; text-align: center; }
+        .specialties-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+        .specialty-card {
+            background: #FFFFFF;
+            padding: 50px 40px;
+            border-radius: 15px;
+            border: 1px solid #efeae0;
+            text-align: left;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .specialty-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.04); }
+        .icon-circle {
+            width: 60px; height: 60px;
+            background: #FDF9F1;
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+        }
+        .specialty-card h3 { font-family: var(--heading-font); font-size: 1.6rem; margin: 0 0 15px 0; }
+        .specialty-card p { color: var(--text-light); font-size: 1rem; margin: 0; }
+
+        /* --- 4. FIND US / LOCATIONS SECTION --- */
+        .locations-section {
+            /* Uses a dark overlay on top of a subtle placeholder image */
+            background: linear-gradient(rgba(58, 38, 24, 0.85), rgba(58, 38, 24, 0.95)), url('https://images.unsplash.com/photo-1506929562872-bb421503ef21?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover;
+            text-align: center;
+            color: white;
+            padding: 120px 5%;
+        }
+        .locations-section .section-heading { color: white; margin-bottom: 60px; }
+        .locations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .location-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 50px 40px;
+            border-radius: 15px;
+        }
+        .location-icon { color: var(--accent-gold); font-size: 1.5rem; margin-bottom: 15px; }
+        .location-card h3 { font-family: var(--heading-font); font-size: 2rem; margin: 0 0 15px 0; }
+        .location-card p { color: #E8E1D9; font-size: 1rem; margin: 0; }
+
+        /* --- 5. FOOTER --- */
+        footer {
+            background: #23160e;
+            color: #E8E1D9;
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .footer-brand { 
+            font-family: var(--signature-font); 
+            font-weight: 400;
+            font-size: 2.5rem; 
+            color: white; 
+            margin-bottom: 15px; 
+        }
+        .footer-links { font-size: 0.9rem; margin-bottom: 20px; color: #a89f91; }
+        .footer-copy { font-size: 0.8rem; color: #7a7063; }
+
+        /* Mobile Responsiveness */
+        @media (max-width: 768px) {
+            .story-grid { grid-template-columns: 1fr; }
+            .home-title { font-size: 3rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <header class="hero-wrapper">
+        <nav class="nav-bar">
+            <a href="{% url 'home' %}" class="nav-brand">Hair By Lasheka</a>
+            
+            <div class="nav-links">
+                <a href="{% url 'home' %}" class="nav-glass-btn">Home</a>
+                <a href="{% url 'catalog' %}" class="nav-glass-btn">Services</a>
+                
+                {% if user.is_authenticated %}
+                <div class="user-menu-container">
+                    <button onclick="toggleDropdown()" class="nav-glass-btn" style="cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.15);">
+                        Welcome, {{ user.username }} ▾
+                    </button>
+                    
+                    <div id="userDropdown" class="user-dropdown">
+                        <form action="{% url 'logout' %}" method="post" style="margin: 0; padding: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="logout-btn">Logout</button>
+                        </form>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'login' %}" class="nav-glass-btn">Login</a>
+                <a href="{% url 'register' %}" class="nav-glass-btn primary">Register</a>
+            {% endif %}
+            </div>
+        </nav>
+
+        <div class="home-hero-content">
+            <div style="color: var(--accent-gold); letter-spacing: 4px; font-size: 0.9rem; margin-bottom: 15px; text-transform: uppercase;">Jamaica • Antigua</div>
+            <h1 class="home-title">Elevate Your Natural Beauty</h1>
+            <p class="home-subtitle">Experience premium natural hair care and protective styling rooted in Caribbean excellence.</p>
+            <a href="{% url 'catalog' %}" class="cta-button">View Our Services</a>
+        </div>
+    </header>
+
+    <section class="section-container">
+        <div class="story-grid">
+            <div class="story-image-placeholder">
+                <p><em>[Your beautiful image goes here]</em></p>
+            </div>
+            <div class="story-text">
+                <div class="section-tagline">Our Story</div>
+                <h2 class="section-heading">Celebrating the beauty of natural hair</h2>
+                <p>Founded by Lasheka, <strong>Hair By Lasheka</strong> was born from a passion for nurturing and celebrating natural hair in the Caribbean. With expertise in protective styling, Lasheka creates looks that are as healthy as they are beautiful.</p>
+                <p>Serving clients across <strong>Jamaica</strong> and <strong>Antigua</strong>, the brand offers a streamlined, digital-first experience — making it easy to browse services, view the catalog, and book your next style without friction.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="specialties-section">
+        <div class="section-container">
+            <div class="section-tagline">What We Do</div>
+            <h2 class="section-heading">Our Specialties</h2>
+            
+            <div class="specialties-grid">
+                <div class="specialty-card">
+                    <div class="icon-circle">✨</div>
+                    <h3>Protective Styling</h3>
+                    <p>Box braids, twists, cornrows, crochet styles and more to shield your hair while keeping you stunning.</p>
+                </div>
+                <div class="specialty-card">
+                    <div class="icon-circle">✂️</div>
+                    <h3>Natural Hair Care</h3>
+                    <p>Deep conditioning, trims, scalp treatments and curl definition tailored to your unique texture.</p>
+                </div>
+                <div class="specialty-card">
+                    <div class="icon-circle">🤎</div>
+                    <h3>Consultation</h3>
+                    <p>Personalized hair journey plans to help you reach your length and health goals with confidence.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="locations-section">
+        <div class="section-tagline">Find Us</div>
+        <h2 class="section-heading">Serving the Caribbean</h2>
+        
+        <div class="locations-grid">
+            <div class="location-card">
+                <div class="location-icon">📍</div>
+                <h3>Jamaica</h3>
+                <p>Our home base — offering a full range of natural hair care and protective styling services.</p>
+            </div>
+            <div class="location-card">
+                <div class="location-icon">📍</div>
+                <h3>Antigua</h3>
+                <p>Expanding our reach across the islands with the same dedication and artistry.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-brand">Hair By Lasheka</div>
+        <div class="footer-links">Natural hair care & protective styling • Jamaica • Antigua</div>
+        <div class="footer-copy">&copy; 2026 Hair By Lasheka. All rights reserved.</div>
+    </footer>
+    <script>
+        function toggleDropdown() {
+            document.getElementById("userDropdown").classList.toggle("show");
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.nav-glass-btn')) {
+                var dropdowns = document.getElementsByClassName("user-dropdown");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

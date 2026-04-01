@@ -3,19 +3,20 @@
 <head>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
-    <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet"> <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Services - Hair by Lasheka</title>
     <style>
         /* 1. The Color Palette & Font Setup */
         :root {
-            --bg-color: #FBF8F1; /* Warm off-white */
-            --text-main: #2C241B; /* Deep brown/charcoal instead of harsh black */
-            --accent-gold: #B88A44; /* The gold from the subheadings */
-            --card-bg: #FFFFFF;
+            --bg-color: #FBF8F1; 
+            --text-main: #2C241B; 
+            --text-light: #554d44;
+            --accent-gold: #B88A44; 
             --heading-font: 'Playfair Display', serif;
             --body-font: 'Lato', sans-serif;
+            /* Add this new line: */
+            --signature-font: 'Great Vibes', cursive; 
         }
 
         body {
@@ -61,32 +62,106 @@
             background-color: transparent;
         }
 
-        .nav-brand {
-            font-family: var(--heading-font);
-            font-weight: 700;
-            font-size: 1.5rem;
-            color: #FFFFFF; /* Changed to white */
-            text-decoration: none;
+        .nav-brand { 
+            font-family: var(--signature-font); 
+            font-weight: 400; /* Un-bolded for a natural signature look */
+            font-size: 2.5rem; /* Increased size so it's readable */
+            color: #FFFFFF; 
+            text-decoration: none; 
         }
 
-        .nav-links a {
+        /* --- GLASSMORPHISM NAVBAR BUTTONS --- */
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 15px; /* Creates even spacing between the glass pills */
+        }
+
+        .nav-glass-btn {
+            background: rgba(255, 255, 255, 0.08); /* Semi-transparent white background */
+            backdrop-filter: blur(12px); /* The frosted glass blur effect */
+            -webkit-backdrop-filter: blur(12px); /* For Safari support */
+            border: 1px solid rgba(255, 255, 255, 0.15); /* The subtle shiny glass edge */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); /* Soft drop shadow */
+            color: #FFFFFF !important;
             font-family: var(--body-font);
-            color: #FFFFFF; /* Changed to white */
-            text-decoration: none;
-            margin-left: 25px;
             font-size: 0.9rem;
-            transition: color 0.3s ease;
+            text-decoration: none;
+            padding: 10px 24px;
+            border-radius: 50px; /* The perfect rounded pill shape */
+            transition: all 0.3s ease;
         }
 
-        .nav-links a:hover {
-            color: var(--accent-gold);
+        /* --- USER DROPDOWN MENU --- */
+        .user-menu-container {
+            position: relative;
+            display: inline-block;
         }
 
-        .btn-register {
-            border: 1px solid var(--accent-gold);
-            color: var(--accent-gold) !important; /* Makes the register button pop */
-            padding: 8px 18px;
-            border-radius: 25px;
+        .user-dropdown {
+            position: absolute;
+            top: 120%; /* Pushes it just below the Welcome button */
+            right: 0;
+            background: rgba(44, 36, 27, 0.85); /* Dark mocha glass */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 8px;
+            min-width: 130px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            
+            /* Hidden by default */
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        /* The class we will trigger with JavaScript */
+        .user-dropdown.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        /* The Vibrant Red Logout Button */
+        .logout-btn {
+            width: 100%;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: #FFFFFF;
+            font-family: var(--body-font);
+            font-size: 0.95rem;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #FF3B30; /* Vibrant Apple Red */
+            color: #FFFFFF;
+            box-shadow: 0 4px 15px rgba(255, 59, 48, 0.4); /* Glowing red shadow */
+        }
+
+        .nav-glass-btn:hover {
+            background: rgba(255, 255, 255, 0.18); /* Becomes slightly brighter on hover */
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+            color: var(--accent-gold) !important;
+        }
+
+        /* A special gold-tinted glass for the Register button to make it pop */
+        .nav-glass-btn.primary {
+            background: rgba(184, 138, 68, 0.2); 
+            border: 1px solid rgba(184, 138, 68, 0.4);
+        }
+        
+        .nav-glass-btn.primary:hover {
+            background: rgba(184, 138, 68, 0.35);
         }
 
         /* 4. The Service Cards */
@@ -100,12 +175,15 @@
         }
 
         .service-card {
-            background: var(--card-bg);
-            border-radius: 12px; /* Soft rounded corners */
+            background: #FFFFFF; 
+            border-radius: 12px; 
             padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03); /* Very subtle shadow */
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
             transition: transform 0.3s ease;
             text-align: left;
+            /* Add these two lines: */
+            display: flex;
+            flex-direction: column;
         }
 
         .service-card:hover {
@@ -131,6 +209,8 @@
             margin-bottom: 25px;
             border-top: 1px solid #eee;
             padding-top: 15px;
+            /* Add this one line: */
+            margin-top: auto;
         }
 
         .service-price {
@@ -177,23 +257,34 @@
 </head>
 <body>
     <nav class="nav-bar">
-        <a href="/" class="nav-brand">Hair By Lasheka</a>
+        <a href="{% url 'home' %}" class="nav-brand">Hair By Lasheka</a>
+        
         <div class="nav-links">
+            <a href="{% url 'home' %}" class="nav-glass-btn">Home</a>
+            <a href="{% url 'catalog' %}" class="nav-glass-btn">Services</a>
+            
             {% if user.is_authenticated %}
-                <span style="margin-right: 15px; color: #FFFFFF;">Welcome, {{ user.username }}</span>
-                <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" style="background: none; border: none; font-family: var(--body-font); font-size: 0.9rem; cursor: pointer; color: var(--accent-gold);">Logout</button>
-                </form>
+                <div class="user-menu-container">
+                    <button onclick="toggleDropdown()" class="nav-glass-btn" style="cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.15);">
+                        Welcome, {{ user.username }} ▾
+                    </button>
+                    
+                    <div id="userDropdown" class="user-dropdown">
+                        <form action="{% url 'logout' %}" method="post" style="margin: 0; padding: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="logout-btn">Logout</button>
+                        </form>
+                    </div>
+                </div>
             {% else %}
-                <a href="{% url 'login' %}">Login</a>
-                <a href="{% url 'register' %}" class="btn-register">Register</a>
+                <a href="{% url 'login' %}" class="nav-glass-btn">Login</a>
+                <a href="{% url 'register' %}" class="nav-glass-btn primary">Register</a>
             {% endif %}
         </div>
     </nav>
 
     <div class="hero-section">
-        <div class="hero-subtitle">Jamaica • Antigua</div>
+        <div style="color: var(--accent-gold); letter-spacing: 4px; font-size: 0.9rem; margin-bottom: 15px; text-transform: uppercase; font-weight: bold;">Jamaica • Antigua</div>
         <h1 class="hero-title">Service Menu</h1>
         <p class="hero-tagline">Natural hair care & protective styling, rooted in Caribbean beauty.</p>
     </div>
@@ -226,5 +317,23 @@
         </div>
         {% endfor %}
     </div>
+    <script>
+        function toggleDropdown() {
+            document.getElementById("userDropdown").classList.toggle("show");
+        }
+
+        // Close the dropdown if the user clicks outside of it
+        window.onclick = function(event) {
+            if (!event.target.matches('.nav-glass-btn')) {
+                var dropdowns = document.getElementsByClassName("user-dropdown");
+                for (var i = 0; i < dropdowns.length; i++) {
+                    var openDropdown = dropdowns[i];
+                    if (openDropdown.classList.contains('show')) {
+                        openDropdown.classList.remove('show');
+                    }
+                }
+            }
+        }
+    </script>
 </body>
 </html>

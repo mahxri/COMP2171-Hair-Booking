@@ -10,10 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env (Improvement E)
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -38,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'bookings',
+    'django_apscheduler',  # Improvement A — for daily reminder emails
 ]
 
 MIDDLEWARE = [
@@ -125,3 +131,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Authentication Redirects
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+# ── EMAIL CONFIGURATION (Feature 8.0 + Improvement E) ─────────────────────────
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')      # Set in .env file
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')  # Set in .env file
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+# ── APSCHEDULER SETTINGS (Improvement A) ──────────────────────────────────────
+APSCHEDULER_DATETIME_FORMAT = "N j, Y, f:s a"
+APSCHEDULER_RUN_NOW_TIMEOUT = 25  # Seconds

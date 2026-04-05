@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Booking Confirmation</title>
+<style>
+  body { margin: 0; padding: 0; background: #F5F0E8; font-family: 'Georgia', serif; }
+  .wrapper { background: #F5F0E8; padding: 40px 20px; }
+  .card { background: #ffffff; border-radius: 16px; max-width: 560px; margin: 0 auto; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+  .header { background: #3A2618; padding: 36px 40px 28px; text-align: center; }
+  .header h1 { font-family: 'Georgia', serif; color: #B88A44; font-size: 2rem; margin: 0 0 4px 0; letter-spacing: 1px; }
+  .header p  { color: rgba(255,255,255,0.7); margin: 0; font-size: 0.9rem; }
+  .body { padding: 36px 40px; }
+  .greeting { font-size: 1rem; color: #2C241B; margin: 0 0 24px 0; line-height: 1.6; }
+  .confirm-badge { display: block; background: #F0FAF0; border: 1px solid #A8D5A2; color: #2A7A2A; text-align: center; padding: 14px; border-radius: 10px; font-size: 1rem; font-weight: bold; margin-bottom: 28px; }
+  h2 { font-family: 'Georgia', serif; font-size: 1.15rem; color: #2C241B; margin: 0 0 16px 0; padding-bottom: 10px; border-bottom: 1px solid #E8E1D9; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 28px; }
+  td { padding: 10px 0; font-size: 0.9rem; vertical-align: top; border-bottom: 1px solid #F5F0E8; }
+  td:first-child { color: #7A7063; text-transform: uppercase; letter-spacing: 1px; font-size: 0.78rem; font-weight: bold; width: 110px; padding-top: 12px; }
+  td:last-child  { color: #2C241B; font-size: 0.95rem; }
+  .price-cell { color: #B88A44 !important; font-weight: bold; font-size: 1.05rem !important; }
+  .footer { background: #F5F0E8; padding: 24px 40px; text-align: center; }
+  .footer p { color: #7A7063; font-size: 0.82rem; margin: 0; line-height: 1.6; }
+  .footer a { color: #B88A44; text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="card">
+    <div class="header">
+      <h1>Hair By Lasheka</h1>
+      <p>Booking Confirmation</p>
+    </div>
+    <div class="body">
+      <p class="greeting">Hello <strong>{{ user.username }}</strong>,<br>
+      Thank you for booking with us. Your appointment has been confirmed and we look forward to seeing you!</p>
+
+      <span class="confirm-badge">✅ Appointment Confirmed</span>
+
+      <h2>Appointment Details</h2>
+      <table>
+        <tr>
+          <td>Service</td>
+          <td>{{ service.name }}</td>
+        </tr>
+        <tr>
+          <td>Date</td>
+          <td>{{ appointment.date|date:"l, F j, Y" }}</td>
+        </tr>
+        <tr>
+          <td>Time</td>
+          <td>{{ appointment.start_time|time:"g:i A" }}</td>
+        </tr>
+        <tr>
+          <td>Duration</td>
+          <td>{{ service.duration_minutes }} minutes</td>
+        </tr>
+        <tr>
+          <td>Price</td>
+          <td class="price-cell">${{ service.price }}</td>
+        </tr>
+        <tr>
+          <td>Requests</td>
+          <td>{{ appointment.special_requests|default:"None" }}</td>
+        </tr>
+      </table>
+
+      <p style="font-size:0.88rem; color:#7A7063; line-height:1.6; margin:0;">
+        Need to make changes? Visit your
+        <a href="http://localhost:8000/appointments/" style="color:#B88A44;">My Bookings</a>
+        page to view or cancel your appointment.
+      </p>
+    </div>
+    <div class="footer">
+      <p>Hair By Lasheka &bull; Booking confirmation<br>
+      This email was sent because you booked an appointment on our website.</p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

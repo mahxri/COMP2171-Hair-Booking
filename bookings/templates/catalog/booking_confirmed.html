@@ -122,7 +122,9 @@
         <div class="nav-links">
             <a href="{% url 'home' %}" class="nav-glass-btn">Home</a>
             <a href="{% url 'catalog' %}" class="nav-glass-btn">Services</a>
-            <a href="{% url 'my_appointments' %}" class="nav-glass-btn">My Bookings</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'my_appointments' %}" class="nav-glass-btn">Appointments</a>
+            {% endif %}
         </div>
     </nav>
 

@@ -154,6 +154,9 @@
         <div class="nav-links">
             <a href="{% url 'home' %}" class="nav-glass-btn">Home</a>
             <a href="{% url 'catalog' %}" class="nav-glass-btn">Services</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'my_appointments' %}" class="nav-glass-btn">Appointments</a>
+            {% endif %}
             <a href="{% url 'register' %}" class="nav-glass-btn" style="border-color: var(--accent-gold); color: var(--accent-gold) !important;">Register</a>
         </div>
     </nav>

@@ -6,10 +6,12 @@ from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.conf import settings
 from django.utils import timezone
-from datetime import datetime
+from datetime import date, datetime
+import calendar
 
 from .models import Service, Appointment
 from .forms import CustomUserCreationForm
+from .availability import active_appointments, booking_conflicts, unavailable_slots_by_date
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -49,6 +51,11 @@ def register_request(request):
 # BOOKING FLOW — STEP A: Choose date / time / phone / requests
 # ─────────────────────────────────────────────────────────────────────────────
 
+# Month rendered on the booking calendar (catalog/book.html); keep in sync.
+_BOOKING_CALENDAR_YEAR = 2026
+_BOOKING_CALENDAR_MONTH = 4
+
+
 @login_required
 def book_service(request, service_id):
     """
@@ -56,11 +63,26 @@ def book_service(request, service_id):
     On POST, saves validated data to the session and redirects to the summary.
     """
     service = get_object_or_404(Service, id=service_id)
-    existing_bookings = Appointment.objects.filter(service=service)
-    booked_times = [
-        booking.start_time.strftime("%I:%M %p").lstrip('0')
-        for booking in existing_bookings
+
+    _, last_day = calendar.monthrange(_BOOKING_CALENDAR_YEAR, _BOOKING_CALENDAR_MONTH)
+    calendar_dates = [
+        date(_BOOKING_CALENDAR_YEAR, _BOOKING_CALENDAR_MONTH, d)
+        for d in range(1, last_day + 1)
     ]
+    appts_month = list(
+        active_appointments().filter(
+            date__year=_BOOKING_CALENDAR_YEAR,
+            date__month=_BOOKING_CALENDAR_MONTH,
+        )
+    )
+    unavailable_by_date = unavailable_slots_by_date(
+        calendar_dates, service.duration_minutes, appts_month
+    )
+    today = timezone.now().date()
+    booking_calendar_payload = {
+        'unavailable': unavailable_by_date,
+        'minDate': today.isoformat(),
+    }
 
     if request.method == 'POST':
         selected_date = request.POST.get('date')
@@ -69,21 +91,41 @@ def book_service(request, service_id):
         client_requests = request.POST.get('special_requests', '')
 
         if selected_date and selected_time and client_phone:
-            # Store in session — NOT saved to DB yet
-            request.session['pending_booking'] = {
-                'service_id': service_id,
-                'date':       selected_date,
-                'time':       selected_time,
-                'phone':      client_phone,
-                'requests':   client_requests,
-            }
-            return redirect('booking_summary')
-
-        messages.error(request, 'Please fill in all required fields.')
+            try:
+                parsed_date = datetime.strptime(selected_date, "%Y-%m-%d").date()
+                parsed_time = datetime.strptime(
+                    selected_time.strip(), "%I:%M %p"
+                ).time()
+            except ValueError:
+                messages.error(request, 'Invalid date or time.')
+            else:
+                day_appts = list(active_appointments().filter(date=parsed_date))
+                if booking_conflicts(
+                    parsed_date,
+                    parsed_time,
+                    service.duration_minutes,
+                    day_appts,
+                ):
+                    messages.error(
+                        request,
+                        'That time overlaps another appointment. Please choose a different slot.',
+                    )
+                else:
+                    # Store in session — NOT saved to DB yet
+                    request.session['pending_booking'] = {
+                        'service_id': service_id,
+                        'date':       selected_date,
+                        'time':       selected_time,
+                        'phone':      client_phone,
+                        'requests':   client_requests,
+                    }
+                    return redirect('booking_summary')
+        else:
+            messages.error(request, 'Please fill in all required fields.')
 
     return render(request, 'catalog/book.html', {
-        'service':     service,
-        'booked_times': booked_times,
+        'service': service,
+        'booking_calendar_payload': booking_calendar_payload,
     })
 
 
@@ -120,6 +162,23 @@ def booking_summary(request):
             # Parse date/time from session
             parsed_date = datetime.strptime(pending['date'], "%Y-%m-%d").date()
             parsed_time = datetime.strptime(pending['time'], "%I:%M %p").time()
+
+            day_appts = list(active_appointments().filter(date=parsed_date))
+            if booking_conflicts(
+                parsed_date,
+                parsed_time,
+                service.duration_minutes,
+                day_appts,
+            ):
+                messages.error(
+                    request,
+                    'That time was just taken. Please go back and pick another slot.',
+                )
+                return render(request, 'catalog/booking_summary.html', {
+                    'service':    service,
+                    'pending':    pending,
+                    'user_email': request.user.email,
+                })
 
             # Save appointment to DB
             appointment = Appointment.objects.create(
@@ -163,9 +222,12 @@ def booking_summary(request):
 @login_required
 def my_appointments(request):
     """Improvement D — Shows all of the user's appointments with status badges."""
-    appointments = Appointment.objects.filter(
-        user=request.user
-    ).select_related('service').order_by('-date', '-start_time')
+    appointments = (
+        Appointment.objects.filter(user=request.user)
+        .exclude(status='cancelled')
+        .select_related('service')
+        .order_by('-date', '-start_time')
+    )
     today = timezone.now().date()
     return render(request, 'catalog/my_appointments.html', {
         'appointments': appointments,
@@ -176,23 +238,19 @@ def my_appointments(request):
 @login_required
 def cancel_appointment(request, pk):
     """
-    Improvement D — Sets an appointment status to 'cancelled' and sends
-    a cancellation confirmation email if one is stored on the appointment.
+    Permanently removes the appointment (client and admin), frees the time slot,
+    and sends a cancellation email when an address is on file.
     """
     appointment = get_object_or_404(Appointment, pk=pk, user=request.user)
 
-    if appointment.status == 'cancelled':
-        messages.warning(request, 'That appointment is already cancelled.')
-        return redirect('my_appointments')
-
-    appointment.status = 'cancelled'
-    appointment.save()
-
-    # Send cancellation email if we have an address
-    if appointment.email:
+    if appointment.status != 'cancelled' and appointment.email:
         _send_cancellation_email(appointment)
 
-    messages.success(request, 'Your appointment has been cancelled.')
+    appointment.delete()
+    messages.success(
+        request,
+        'Your appointment has been cancelled. The time slot is available again.',
+    )
     return redirect('my_appointments')
 
 

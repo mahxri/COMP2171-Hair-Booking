@@ -18,17 +18,30 @@ class Service(models.Model):
 from datetime import datetime, timedelta
 
 class Appointment(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     date = models.DateField()
     start_time = models.TimeField()
     end_time = models.TimeField(blank=True, null=True)
-    
-    # --- NEW FIELDS ---
-    phone_number = models.CharField(max_length=10) 
-    special_requests = models.TextField(blank=True, null=True) # Optional field
-    # ------------------
-    
+
+    # --- CLIENT CONTACT FIELDS ---
+    phone_number = models.CharField(max_length=10)
+    email = models.EmailField(blank=True, null=True)       # Feature 8.0 — confirmation email
+    special_requests = models.TextField(blank=True, null=True)
+
+    # --- STATUS FIELD (Improvement D) ---
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='confirmed',
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
 
     def save(self, *args, **kwargs):

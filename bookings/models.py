@@ -54,4 +54,37 @@ class Appointment(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.service.name} on {self.date}"
-    
+
+
+class StaffDaySchedule(models.Model):
+    """
+    Weekly working hours for salon staff (is_staff users). Used to compute
+    bookable time slots as the union of all configured staff shifts.
+    Weekday follows Python: 0=Monday … 6=Sunday.
+    """
+    WEEKDAY_CHOICES = [
+        (0, 'Monday'),
+        (1, 'Tuesday'),
+        (2, 'Wednesday'),
+        (3, 'Thursday'),
+        (4, 'Friday'),
+        (5, 'Saturday'),
+        (6, 'Sunday'),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='staff_day_schedules',
+    )
+    weekday = models.PositiveSmallIntegerField(choices=WEEKDAY_CHOICES)
+    is_working = models.BooleanField(default=True)
+    opens_at = models.TimeField(blank=True, null=True)
+    closes_at = models.TimeField(blank=True, null=True)
+
+    class Meta:
+        unique_together = [['user', 'weekday']]
+        ordering = ['user_id', 'weekday']
+
+    def __str__(self):
+        return f"{self.user.username} — day {self.weekday}"

@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.utils.dateparse import parse_time
 from django.contrib.auth import login
 from django.contrib import messages
 from django.core.mail import EmailMultiAlternatives
@@ -9,9 +11,17 @@ from django.utils import timezone
 from datetime import date, datetime
 import calendar
 
-from .models import Service, Appointment
+from .models import Service, Appointment, StaffDaySchedule
 from .forms import CustomUserCreationForm
-from .availability import active_appointments, booking_conflicts, unavailable_slots_by_date
+from .availability import (
+    active_appointments,
+    booking_conflicts,
+    unavailable_slots_by_date,
+    is_slot_allowed_by_staff_hours,
+    extended_slot_times,
+    format_slot_label,
+    bookable_slot_labels_for_date,
+)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -55,6 +65,93 @@ def register_request(request):
 _BOOKING_CALENDAR_YEAR = 2026
 _BOOKING_CALENDAR_MONTH = 4
 
+_STAFF_WEEKDAY_NAMES = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday',
+]
+
+
+def _ensure_default_staff_schedule(user):
+    if StaffDaySchedule.objects.filter(user=user).exists():
+        return
+    rows = []
+    for wd in range(6):
+        rows.append(
+            StaffDaySchedule(
+                user=user,
+                weekday=wd,
+                is_working=True,
+                opens_at=datetime.strptime('09:00', '%H:%M').time(),
+                closes_at=datetime.strptime('17:00', '%H:%M').time(),
+            )
+        )
+    rows.append(
+        StaffDaySchedule(
+            user=user,
+            weekday=6,
+            is_working=False,
+            opens_at=None,
+            closes_at=None,
+        )
+    )
+    StaffDaySchedule.objects.bulk_create(rows)
+
+
+def _get_reschedule_for_booking(request, service_id):
+    """
+    Reschedule flow: honors ?reschedule= on GET (stores id in session), otherwise
+    uses session if it matches this service. Returns (appointment_or_None, exclude_id).
+    """
+    if request.method == 'GET':
+        q = request.GET.get('reschedule')
+        if q is not None and str(q).strip() != '':
+            try:
+                qid = int(q)
+            except ValueError:
+                messages.error(request, 'Invalid reschedule link.')
+                if 'reschedule_appointment_id' in request.session:
+                    del request.session['reschedule_appointment_id']
+                return None, None
+            appt = (
+                Appointment.objects.filter(pk=qid, user=request.user)
+                .exclude(status='cancelled')
+                .select_related('service')
+                .first()
+            )
+            if not appt:
+                messages.error(request, 'That appointment could not be found.')
+                if 'reschedule_appointment_id' in request.session:
+                    del request.session['reschedule_appointment_id']
+                return None, None
+            if appt.service_id != service_id:
+                messages.error(
+                    request,
+                    'Reschedule must be for the same service as your appointment.',
+                )
+                return None, None
+            request.session['reschedule_appointment_id'] = appt.pk
+            return appt, appt.pk
+
+    rid = request.session.get('reschedule_appointment_id')
+    if not rid:
+        return None, None
+    appt = (
+        Appointment.objects.filter(pk=rid, user=request.user)
+        .exclude(status='cancelled')
+        .select_related('service')
+        .first()
+    )
+    if not appt or appt.service_id != service_id:
+        if 'reschedule_appointment_id' in request.session:
+            del request.session['reschedule_appointment_id']
+        return None, None
+    return appt, appt.pk
+
 
 @login_required
 def book_service(request, service_id):
@@ -63,6 +160,9 @@ def book_service(request, service_id):
     On POST, saves validated data to the session and redirects to the summary.
     """
     service = get_object_or_404(Service, id=service_id)
+    reschedule_appointment, exclude_appt_id = _get_reschedule_for_booking(
+        request, service_id
+    )
 
     _, last_day = calendar.monthrange(_BOOKING_CALENDAR_YEAR, _BOOKING_CALENDAR_MONTH)
     calendar_dates = [
@@ -76,13 +176,23 @@ def book_service(request, service_id):
         )
     )
     unavailable_by_date = unavailable_slots_by_date(
-        calendar_dates, service.duration_minutes, appts_month
+        calendar_dates,
+        service.duration_minutes,
+        appts_month,
+        exclude_appointment_id=exclude_appt_id,
     )
     today = timezone.now().date()
+    no_booking_dates = [
+        d.isoformat()
+        for d in calendar_dates
+        if not bookable_slot_labels_for_date(d, service.duration_minutes)
+    ]
     booking_calendar_payload = {
         'unavailable': unavailable_by_date,
         'minDate': today.isoformat(),
+        'noBookingDates': no_booking_dates,
     }
+    booking_slot_labels = [format_slot_label(t) for t in extended_slot_times()]
 
     if request.method == 'POST':
         selected_date = request.POST.get('date')
@@ -100,11 +210,19 @@ def book_service(request, service_id):
                 messages.error(request, 'Invalid date or time.')
             else:
                 day_appts = list(active_appointments().filter(date=parsed_date))
-                if booking_conflicts(
+                if not is_slot_allowed_by_staff_hours(
+                    parsed_date, parsed_time, service.duration_minutes
+                ):
+                    messages.error(
+                        request,
+                        'That time is outside working hours. Please choose another slot.',
+                    )
+                elif booking_conflicts(
                     parsed_date,
                     parsed_time,
                     service.duration_minutes,
                     day_appts,
+                    exclude_appointment_id=exclude_appt_id,
                 ):
                     messages.error(
                         request,
@@ -112,13 +230,16 @@ def book_service(request, service_id):
                     )
                 else:
                     # Store in session — NOT saved to DB yet
-                    request.session['pending_booking'] = {
+                    pending = {
                         'service_id': service_id,
                         'date':       selected_date,
                         'time':       selected_time,
                         'phone':      client_phone,
                         'requests':   client_requests,
                     }
+                    if exclude_appt_id:
+                        pending['reschedule_appointment_id'] = exclude_appt_id
+                    request.session['pending_booking'] = pending
                     return redirect('booking_summary')
         else:
             messages.error(request, 'Please fill in all required fields.')
@@ -126,6 +247,8 @@ def book_service(request, service_id):
     return render(request, 'catalog/book.html', {
         'service': service,
         'booking_calendar_payload': booking_calendar_payload,
+        'reschedule_appointment': reschedule_appointment,
+        'booking_slot_labels': booking_slot_labels,
     })
 
 
@@ -154,7 +277,11 @@ def booking_summary(request):
 
         if action == 'edit':
             # Return user to the booking form; session data stays intact
-            return redirect('book_service', service_id=service.id)
+            url = reverse('book_service', kwargs={'service_id': service.id})
+            rid = pending.get('reschedule_appointment_id')
+            if rid:
+                url = f'{url}?reschedule={rid}'
+            return redirect(url)
 
         if action == 'confirm':
             client_email = request.POST.get('email', '').strip()
@@ -163,12 +290,26 @@ def booking_summary(request):
             parsed_date = datetime.strptime(pending['date'], "%Y-%m-%d").date()
             parsed_time = datetime.strptime(pending['time'], "%I:%M %p").time()
 
+            reschedule_id = pending.get('reschedule_appointment_id')
             day_appts = list(active_appointments().filter(date=parsed_date))
+            if not is_slot_allowed_by_staff_hours(
+                parsed_date, parsed_time, service.duration_minutes
+            ):
+                messages.error(
+                    request,
+                    'That time is outside working hours. Please go back and pick another slot.',
+                )
+                return render(request, 'catalog/booking_summary.html', {
+                    'service':    service,
+                    'pending':    pending,
+                    'user_email': request.user.email,
+                })
             if booking_conflicts(
                 parsed_date,
                 parsed_time,
                 service.duration_minutes,
                 day_appts,
+                exclude_appointment_id=reschedule_id,
             ):
                 messages.error(
                     request,
@@ -180,20 +321,46 @@ def booking_summary(request):
                     'user_email': request.user.email,
                 })
 
-            # Save appointment to DB
-            appointment = Appointment.objects.create(
-                user=request.user,
-                service=service,
-                date=parsed_date,
-                start_time=parsed_time,
-                phone_number=pending['phone'],
-                special_requests=pending.get('requests', ''),
-                email=client_email,
-                status='confirmed',
-            )
+            # Save or update appointment in DB
+            if reschedule_id:
+                appointment = get_object_or_404(
+                    Appointment,
+                    pk=reschedule_id,
+                    user=request.user,
+                )
+                if appointment.service_id != service.id:
+                    messages.error(
+                        request,
+                        'This booking no longer matches the selected service.',
+                    )
+                    return render(request, 'catalog/booking_summary.html', {
+                        'service':    service,
+                        'pending':    pending,
+                        'user_email': request.user.email,
+                    })
+                appointment.date = parsed_date
+                appointment.start_time = parsed_time
+                appointment.phone_number = pending['phone']
+                appointment.special_requests = pending.get('requests', '')
+                appointment.email = client_email or None
+                appointment.status = 'confirmed'
+                appointment.save()
+            else:
+                appointment = Appointment.objects.create(
+                    user=request.user,
+                    service=service,
+                    date=parsed_date,
+                    start_time=parsed_time,
+                    phone_number=pending['phone'],
+                    special_requests=pending.get('requests', ''),
+                    email=client_email,
+                    status='confirmed',
+                )
 
             # Clear session
             del request.session['pending_booking']
+            if 'reschedule_appointment_id' in request.session:
+                del request.session['reschedule_appointment_id']
 
             # Send HTML confirmation email (Improvement C)
             email_sent = False
@@ -252,6 +419,65 @@ def cancel_appointment(request, pk):
         'Your appointment has been cancelled. The time slot is available again.',
     )
     return redirect('my_appointments')
+
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def staff_working_hours(request):
+    """Let staff configure their weekly working hours (salon booking grid)."""
+    user = request.user
+    _ensure_default_staff_schedule(user)
+
+    if request.method == 'POST':
+        to_update = []
+        errors = []
+        for wd in range(7):
+            row = get_object_or_404(StaffDaySchedule, user=user, weekday=wd)
+            working = request.POST.get(f'working_{wd}') == '1'
+            if not working:
+                row.is_working = False
+                row.opens_at = None
+                row.closes_at = None
+                to_update.append(row)
+                continue
+            o_raw = (request.POST.get(f'opens_{wd}', '') or '').strip()
+            c_raw = (request.POST.get(f'closes_{wd}', '') or '').strip()
+            opens_at = parse_time(o_raw) if o_raw else None
+            closes_at = parse_time(c_raw) if c_raw else None
+            if not opens_at or not closes_at or opens_at >= closes_at:
+                errors.append(
+                    f'{_STAFF_WEEKDAY_NAMES[wd]}: add a valid open and close time '
+                    '(close must be after open).'
+                )
+                continue
+            row.is_working = True
+            row.opens_at = opens_at
+            row.closes_at = closes_at
+            to_update.append(row)
+        if errors:
+            for err in errors:
+                messages.error(request, err)
+        else:
+            StaffDaySchedule.objects.bulk_update(
+                to_update,
+                ['is_working', 'opens_at', 'closes_at'],
+            )
+            messages.success(
+                request,
+                'Your working hours were saved. Booking slots update for everyone.',
+            )
+            return redirect('staff_working_hours')
+
+    schedules = list(
+        StaffDaySchedule.objects.filter(user=user).order_by('weekday')
+    )
+    schedule_rows = [
+        {'label': _STAFF_WEEKDAY_NAMES[s.weekday], 'row': s}
+        for s in schedules
+    ]
+    return render(request, 'catalog/staff_working_hours.html', {
+        'schedule_rows': schedule_rows,
+    })
 
 
 # ─────────────────────────────────────────────────────────────────────────────

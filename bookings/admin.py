@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Service, Appointment
+from .models import Service, Appointment, StaffDaySchedule
 
 
 @admin.register(Service)
@@ -50,3 +50,11 @@ class AppointmentAdmin(admin.ModelAdmin):
             and request.user.is_staff
             and request.user.has_perm(change_perm)
         )
+
+
+@admin.register(StaffDaySchedule)
+class StaffDayScheduleAdmin(admin.ModelAdmin):
+    list_display = ('user', 'weekday', 'is_working', 'opens_at', 'closes_at')
+    list_filter = ('is_working', 'weekday')
+    search_fields = ('user__username',)
+    ordering = ('user_id', 'weekday')

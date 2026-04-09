@@ -110,6 +110,9 @@
             {% if user.is_authenticated %}
             <a href="{% url 'my_appointments' %}" class="nav-glass-btn">Appointments</a>
             {% endif %}
+            {% if user.is_staff %}
+            <a href="{% url 'staff_working_hours' %}" class="nav-glass-btn">My hours</a>
+            {% endif %}
             <span class="nav-glass-btn" style="cursor: default;">{{ user.username }}</span>
         </div>
     </nav>
@@ -123,6 +126,14 @@
     {% endif %}
 
     <div class="booking-container page-transition">
+
+        {% if reschedule_appointment %}
+        <div style="background:#FFF8EC;border:1px solid #F0D070;border-radius:12px;padding:14px 18px;margin-bottom:24px;font-size:0.95rem;color:var(--text-main);">
+            <strong>Rescheduling</strong> — your current time
+            ({{ reschedule_appointment.date|date:"M j, Y" }} at {{ reschedule_appointment.start_time|time:"g:i A" }})
+            stays booked until you confirm a new slot below.
+        </div>
+        {% endif %}
         
         <div class="booking-header">
             <h1>Book Your Appointment</h1>
@@ -198,28 +209,16 @@
                         <div class="cal-day disabled" style="visibility:hidden" aria-hidden="true"></div>
                         <div class="cal-day disabled" style="visibility:hidden" aria-hidden="true"></div>
                     </div>
-                    <div class="cal-footer">Sundays are closed. Past dates unavailable.</div>
+                    <div class="cal-footer">Past dates and days with no staff hours are unavailable.</div>
                 </div>
             </div>
 
             <div>
                 <h2 class="section-title" id="selected-date-header">Available Times — Apr 9, 2026</h2>
                 <div class="time-grid">
-                    <div class="time-slot">9:00 AM</div>
-                    <div class="time-slot">9:30 AM</div>
-                    <div class="time-slot">10:00 AM</div>
-                    <div class="time-slot">10:30 AM</div>
-                    <div class="time-slot">11:00 AM</div>
-                    <div class="time-slot">11:30 AM</div>
-                    <div class="time-slot">12:00 PM</div>
-                    <div class="time-slot">1:00 PM</div>
-                    <div class="time-slot">1:30 PM</div>
-                    <div class="time-slot">2:00 PM</div>
-                    <div class="time-slot">2:30 PM</div>
-                    <div class="time-slot">3:00 PM</div>
-                    <div class="time-slot">3:30 PM</div>
-                    <div class="time-slot">4:00 PM</div>
-                    <div class="time-slot">4:30 PM</div>
+                    {% for slot in booking_slot_labels %}
+                    <div class="time-slot">{{ slot }}</div>
+                    {% endfor %}
                 </div>
                 
                 <form method="POST" id="bookingForm" style="margin-top: 30px; background: #FFFFFF; padding: 25px; border-radius: 15px; border: 1px solid #E8E1D9; box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
@@ -255,6 +254,7 @@
             const payload = JSON.parse(document.getElementById('salon-booking-calendar').textContent);
             const unavailable = payload.unavailable || {};
             const minDateStr = payload.minDate;
+            const noBookingDates = new Set(payload.noBookingDates || []);
 
             const dateHeader = document.getElementById('selected-date-header');
             const hiddenDateInput = document.getElementById('hiddenDateValue');
@@ -280,15 +280,14 @@
                 confirmBtn.innerText = 'Select a time to confirm';
             }
 
-            function applyPastAndSundayRules() {
+            function applyPastAndClosedDaysRules() {
                 document.querySelectorAll('.cal-day[data-date]').forEach(function(cell) {
                     const ds = cell.getAttribute('data-date');
                     if (!ds) return;
-                    const d = parseISODate(ds);
                     if (minDateStr && ds < minDateStr) {
                         cell.classList.add('disabled');
                     }
-                    if (d.getDay() === 0) {
+                    if (noBookingDates.has(ds)) {
                         cell.classList.add('disabled');
                     }
                 });
@@ -309,7 +308,7 @@
                 resetConfirmButton();
             }
 
-            applyPastAndSundayRules();
+            applyPastAndClosedDaysRules();
 
             const selectedDay = document.querySelector('.cal-day.selected');
             if (selectedDay && selectedDay.getAttribute('data-date')) {

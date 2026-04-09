@@ -104,6 +104,22 @@
         }
         .btn-cancel:hover { background: #c0392b; color: #fff; border-color: #c0392b; }
 
+        /* Reschedule Button */
+        .btn-reschedule {
+            background: transparent;
+            border: 1px solid #ddd;
+            color: var(--accent-gold);
+            padding: 7px 16px;
+            border-radius: 8px;
+            font-family: var(--body-font);
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            text-decoration: none;
+        }
+        .btn-reschedule:hover { background: var(--accent-gold); color: #fff; border-color: var(--accent-gold); }
+
         /* Book More */
         .book-more { text-align: center; margin-top: 32px; }
         .book-more a { color: var(--accent-gold); text-decoration: none; font-weight: 700; font-size: 0.95rem; transition: color 0.3s; }
@@ -122,6 +138,13 @@
         <div class="nav-links">
             <a href="{% url 'home' %}" class="nav-glass-btn">Home</a>
             <a href="{% url 'catalog' %}" class="nav-glass-btn">Services</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'my_appointments' %}" class="nav-glass-btn">Appointments</a>
+            {% endif %}
+            {% if user.is_staff %}
+            <a href="{% url 'staff_working_hours' %}" class="nav-glass-btn">My hours</a>
+            <a href="{% url 'reports_panel' %}" class="nav-glass-btn">Reports</a>
+            {% endif %}
             <span class="nav-glass-btn" style="cursor: default;">{{ user.username }}</span>
         </div>
     </nav>
@@ -165,6 +188,11 @@
 
                     {% if appt.status != 'cancelled' and appt.date >= today %}
                     {% with formatted_date=appt.date|date:"M j, Y" %}
+                    <a href="{% url 'book_service' appt.service.id %}?reschedule={{ appt.pk }}"
+                       class="btn-reschedule"
+                       onclick="return confirm('Pick a new time? Your current appointment stays until you confirm the new one.')">
+                       Reschedule
+                    </a>
                     <a href="{% url 'cancel_appointment' appt.pk %}"
                        class="btn-cancel"
                        onclick="return confirm('Cancel your {{ appt.service.name }} appointment on {{ formatted_date }}?')">

@@ -15,6 +15,10 @@ urlpatterns = [
     path('appointments/', views.my_appointments, name='my_appointments'),
     path('appointments/cancel/<int:pk>/', views.cancel_appointment, name='cancel_appointment'),
 
+    # Staff
+    path('staff/working-hours/', views.staff_working_hours, name='staff_working_hours'),
+    path('reports/', views.reports_panel, name='reports_panel'),
+
     # Authentication
     path('register/', views.register_request, name='register'),
     path('login/', auth_views.LoginView.as_view(template_name='catalog/login.html'), name='login'),

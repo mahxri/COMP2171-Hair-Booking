@@ -107,11 +107,33 @@
         <div class="nav-links">
             <a href="{% url 'home' %}" class="nav-glass-btn">Home</a>
             <a href="{% url 'catalog' %}" class="nav-glass-btn">Services</a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'my_appointments' %}" class="nav-glass-btn">Appointments</a>
+            {% endif %}
+            {% if user.is_staff %}
+            <a href="{% url 'staff_working_hours' %}" class="nav-glass-btn">My hours</a>
+            {% endif %}
             <span class="nav-glass-btn" style="cursor: default;">{{ user.username }}</span>
         </div>
     </nav>
 
+    {% if messages %}
+    <ul class="messages" style="list-style:none;max-width:900px;margin:20px auto 0;padding:0 20px;">
+        {% for message in messages %}
+        <li style="padding:12px 16px;border-radius:8px;margin-bottom:8px;{% if message.tags == 'error' %}background:#FFF0F0;border:1px solid #F0A0A0;color:#A00000;{% else %}background:#F5F0E8;border:1px solid #E8E1D9;{% endif %}">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
     <div class="booking-container page-transition">
+
+        {% if reschedule_appointment %}
+        <div style="background:#FFF8EC;border:1px solid #F0D070;border-radius:12px;padding:14px 18px;margin-bottom:24px;font-size:0.95rem;color:var(--text-main);">
+            <strong>Rescheduling</strong> — your current time
+            ({{ reschedule_appointment.date|date:"M j, Y" }} at {{ reschedule_appointment.start_time|time:"g:i A" }})
+            stays booked until you confirm a new slot below.
+        </div>
+        {% endif %}
         
         <div class="booking-header">
             <h1>Book Your Appointment</h1>
@@ -146,41 +168,57 @@
                     <div class="calendar-grid">
                         <div class="cal-day-name">Su</div><div class="cal-day-name">Mo</div><div class="cal-day-name">Tu</div>
                         <div class="cal-day-name">We</div><div class="cal-day-name">Th</div><div class="cal-day-name">Fr</div><div class="cal-day-name">Sa</div>
-                        
-                        <div class="cal-day disabled">29</div><div class="cal-day disabled">30</div><div class="cal-day disabled">31</div>
-                        <div class="cal-day today">1</div><div class="cal-day">2</div><div class="cal-day">3</div><div class="cal-day disabled">4</div>
-                        
-                        <div class="cal-day disabled">5</div><div class="cal-day">6</div><div class="cal-day">7</div><div class="cal-day">8</div>
-                        <div class="cal-day selected">9</div><div class="cal-day">10</div><div class="cal-day disabled">11</div>
-                        
-                        <div class="cal-day disabled">12</div><div class="cal-day">13</div><div class="cal-day">14</div><div class="cal-day">15</div>
-                        <div class="cal-day">16</div><div class="cal-day">17</div><div class="cal-day disabled">18</div>
-                        
-                        <div class="cal-day disabled">19</div><div class="cal-day">20</div><div class="cal-day">21</div><div class="cal-day">22</div>
-                        <div class="cal-day">23</div><div class="cal-day">24</div><div class="cal-day disabled">25</div>
+
+                        <div class="cal-day disabled" data-date="2026-03-29">29</div>
+                        <div class="cal-day disabled" data-date="2026-03-30">30</div>
+                        <div class="cal-day disabled" data-date="2026-03-31">31</div>
+                        <div class="cal-day" data-date="2026-04-01">1</div>
+                        <div class="cal-day" data-date="2026-04-02">2</div>
+                        <div class="cal-day" data-date="2026-04-03">3</div>
+                        <div class="cal-day" data-date="2026-04-04">4</div>
+
+                        <div class="cal-day disabled" data-date="2026-04-05">5</div>
+                        <div class="cal-day" data-date="2026-04-06">6</div>
+                        <div class="cal-day" data-date="2026-04-07">7</div>
+                        <div class="cal-day" data-date="2026-04-08">8</div>
+                        <div class="cal-day selected" data-date="2026-04-09">9</div>
+                        <div class="cal-day" data-date="2026-04-10">10</div>
+                        <div class="cal-day" data-date="2026-04-11">11</div>
+
+                        <div class="cal-day disabled" data-date="2026-04-12">12</div>
+                        <div class="cal-day" data-date="2026-04-13">13</div>
+                        <div class="cal-day" data-date="2026-04-14">14</div>
+                        <div class="cal-day" data-date="2026-04-15">15</div>
+                        <div class="cal-day" data-date="2026-04-16">16</div>
+                        <div class="cal-day" data-date="2026-04-17">17</div>
+                        <div class="cal-day" data-date="2026-04-18">18</div>
+
+                        <div class="cal-day disabled" data-date="2026-04-19">19</div>
+                        <div class="cal-day" data-date="2026-04-20">20</div>
+                        <div class="cal-day" data-date="2026-04-21">21</div>
+                        <div class="cal-day" data-date="2026-04-22">22</div>
+                        <div class="cal-day" data-date="2026-04-23">23</div>
+                        <div class="cal-day" data-date="2026-04-24">24</div>
+                        <div class="cal-day" data-date="2026-04-25">25</div>
+
+                        <div class="cal-day disabled" data-date="2026-04-26">26</div>
+                        <div class="cal-day" data-date="2026-04-27">27</div>
+                        <div class="cal-day" data-date="2026-04-28">28</div>
+                        <div class="cal-day" data-date="2026-04-29">29</div>
+                        <div class="cal-day" data-date="2026-04-30">30</div>
+                        <div class="cal-day disabled" style="visibility:hidden" aria-hidden="true"></div>
+                        <div class="cal-day disabled" style="visibility:hidden" aria-hidden="true"></div>
                     </div>
-                    <div class="cal-footer">Sundays are closed. Past dates unavailable.</div>
+                    <div class="cal-footer">Past dates and days with no staff hours are unavailable.</div>
                 </div>
             </div>
 
             <div>
                 <h2 class="section-title" id="selected-date-header">Available Times — Apr 9, 2026</h2>
                 <div class="time-grid">
-                    <div class="time-slot disabled">9:00 AM</div>
-                    <div class="time-slot">9:30 AM</div>
-                    <div class="time-slot">10:00 AM</div>
-                    <div class="time-slot disabled">10:30 AM</div>
-                    <div class="time-slot">11:00 AM</div>
-                    <div class="time-slot">11:30 AM</div>
-                    <div class="time-slot disabled">12:00 PM</div>
-                    <div class="time-slot">1:00 PM</div>
-                    <div class="time-slot">1:30 PM</div>
-                    <div class="time-slot disabled">2:00 PM</div>
-                    <div class="time-slot">2:30 PM</div>
-                    <div class="time-slot">3:00 PM</div>
-                    <div class="time-slot disabled">3:30 PM</div>
-                    <div class="time-slot">4:00 PM</div>
-                    <div class="time-slot">4:30 PM</div>
+                    {% for slot in booking_slot_labels %}
+                    <div class="time-slot">{{ slot }}</div>
+                    {% endfor %}
                 </div>
                 
                 <form method="POST" id="bookingForm" style="margin-top: 30px; background: #FFFFFF; padding: 25px; border-radius: 15px; border: 1px solid #E8E1D9; box-shadow: 0 10px 30px rgba(0,0,0,0.02);">
@@ -209,47 +247,100 @@
 
     </div>
 
+    {{ booking_calendar_payload|json_script:"salon-booking-calendar" }}
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // 1. Interactive Date Selection
-            const calendarDays = document.querySelectorAll('.cal-day:not(.disabled)');
-            const dateHeader = document.getElementById('selected-date-header');
+            const payload = JSON.parse(document.getElementById('salon-booking-calendar').textContent);
+            const unavailable = payload.unavailable || {};
+            const minDateStr = payload.minDate;
+            const noBookingDates = new Set(payload.noBookingDates || []);
 
-            calendarDays.forEach(day => {
+            const dateHeader = document.getElementById('selected-date-header');
+            const hiddenDateInput = document.getElementById('hiddenDateValue');
+            const hiddenTimeInput = document.getElementById('hiddenTimeValue');
+            const confirmBtn = document.getElementById('confirmBtn');
+
+            function parseISODate(s) {
+                const parts = s.split('-');
+                return new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+            }
+
+            function formatHeader(dateStr) {
+                const d = parseISODate(dateStr);
+                const opts = { month: 'short', day: 'numeric', year: 'numeric' };
+                return 'Available Times — ' + d.toLocaleDateString('en-US', opts);
+            }
+
+            function resetConfirmButton() {
+                confirmBtn.disabled = true;
+                confirmBtn.style.background = '#ccc';
+                confirmBtn.style.color = '#666';
+                confirmBtn.style.cursor = 'not-allowed';
+                confirmBtn.innerText = 'Select a time to confirm';
+            }
+
+            function applyPastAndClosedDaysRules() {
+                document.querySelectorAll('.cal-day[data-date]').forEach(function(cell) {
+                    const ds = cell.getAttribute('data-date');
+                    if (!ds) return;
+                    if (minDateStr && ds < minDateStr) {
+                        cell.classList.add('disabled');
+                    }
+                    if (noBookingDates.has(ds)) {
+                        cell.classList.add('disabled');
+                    }
+                });
+            }
+
+            function applyUnavailableSlots(dateStr) {
+                const blocked = new Set(unavailable[dateStr] || []);
+                document.querySelectorAll('.time-slot').forEach(function(slot) {
+                    const label = slot.textContent.trim();
+                    if (blocked.has(label)) {
+                        slot.classList.add('disabled');
+                    } else {
+                        slot.classList.remove('disabled');
+                    }
+                    slot.classList.remove('selected');
+                });
+                hiddenTimeInput.value = '';
+                resetConfirmButton();
+            }
+
+            applyPastAndClosedDaysRules();
+
+            const selectedDay = document.querySelector('.cal-day.selected');
+            if (selectedDay && selectedDay.getAttribute('data-date')) {
+                const ds = selectedDay.getAttribute('data-date');
+                hiddenDateInput.value = ds;
+                dateHeader.innerText = formatHeader(ds);
+                applyUnavailableSlots(ds);
+            }
+
+            document.querySelectorAll('.cal-day[data-date]').forEach(function(day) {
                 day.addEventListener('click', function() {
-                    // Remove 'selected' from all days
-                    document.querySelectorAll('.cal-day').forEach(d => d.classList.remove('selected'));
-                    
-                    // Add 'selected' to the specific day you just clicked
-                    this.classList.add('selected');
-                    
-                    // Dynamically update the header text
-                    const dayNumber = this.innerText;
-                    dateHeader.innerText = `Available Times — Apr ${dayNumber}, 2026`;
+                    if (day.classList.contains('disabled')) return;
+                    document.querySelectorAll('.cal-day').forEach(function(d) { d.classList.remove('selected'); });
+                    day.classList.add('selected');
+                    const ds = day.getAttribute('data-date');
+                    hiddenDateInput.value = ds;
+                    dateHeader.innerText = formatHeader(ds);
+                    applyUnavailableSlots(ds);
                 });
             });
 
-            // 2. Interactive Time Slot Selection & Form Enabling
-            const timeSlots = document.querySelectorAll('.time-slot:not(.disabled)');
-            const hiddenTimeInput = document.getElementById('hiddenTimeValue');
-            const confirmBtn = document.getElementById('confirmBtn');
-            
-            timeSlots.forEach(slot => {
-                slot.addEventListener('click', function() {
-                    // Remove selected state from others
-                    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-                    this.classList.add('selected');
-                    
-                    // Set the hidden input value so Django can read it
-                    hiddenTimeInput.value = this.innerText; // e.g., "09:30"
-
-                    // Wake up the Confirm Button!
-                    confirmBtn.disabled = false;
-                    confirmBtn.style.background = 'var(--accent-gold)';
-                    confirmBtn.style.color = '#FFFFFF';
-                    confirmBtn.style.cursor = 'pointer';
-                    confirmBtn.innerText = 'Confirm Appointment';
-                });
+            document.querySelector('.time-grid').addEventListener('click', function(e) {
+                const slot = e.target.closest('.time-slot');
+                if (!slot || slot.classList.contains('disabled')) return;
+                document.querySelectorAll('.time-slot').forEach(function(s) { s.classList.remove('selected'); });
+                slot.classList.add('selected');
+                hiddenTimeInput.value = slot.textContent.trim();
+                confirmBtn.disabled = false;
+                confirmBtn.style.background = 'var(--accent-gold)';
+                confirmBtn.style.color = '#FFFFFF';
+                confirmBtn.style.cursor = 'pointer';
+                confirmBtn.innerText = 'Confirm Appointment';
             });
         });
     </script>

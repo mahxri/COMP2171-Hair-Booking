@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Working Hours | Hair By Lasheka</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #FBF8F1;
+            --text-main: #2C241B;
+            --text-light: #7A7063;
+            --accent-gold: #B88A44;
+            --heading-font: 'Playfair Display', serif;
+            --body-font: 'Lato', sans-serif;
+            --signature-font: 'Great Vibes', cursive;
+        }
+        body { font-family: var(--body-font); background: var(--bg-color); color: var(--text-main); margin: 0; padding: 0; }
+        .nav-bar { display: flex; justify-content: space-between; align-items: center; padding: 20px 5%; background: #3A2618; }
+        .nav-brand { font-family: var(--signature-font); font-size: 2.5rem; color: #fff; text-decoration: none; }
+        .nav-links { display: flex; align-items: center; gap: 15px; }
+        .nav-glass-btn { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff !important; font-family: var(--body-font); font-size: 0.9rem; text-decoration: none; padding: 10px 24px; border-radius: 50px; transition: all 0.3s ease; }
+        .nav-glass-btn:hover { background: rgba(255,255,255,0.18); transform: translateY(-2px); }
+        .container { max-width: 720px; margin: 40px auto; padding: 0 20px 60px; }
+        .page-header h1 { font-family: var(--heading-font); font-size: 2.2rem; margin: 0 0 8px 0; }
+        .page-header p { color: var(--text-light); margin: 0 0 28px 0; font-size: 0.95rem; }
+        .messages { list-style: none; padding: 0; margin: 0 0 24px 0; }
+        .messages li { padding: 14px 18px; border-radius: 10px; margin-bottom: 10px; font-size: 0.95rem; }
+        .messages li.success { background: #F0FAF0; border: 1px solid #A8D5A2; color: #2A7A2A; }
+        .messages li.error { background: #FFF0F0; border: 1px solid #F0A0A0; color: #A00000; }
+        .card { background: #fff; border: 1px solid #E8E1D9; border-radius: 14px; padding: 28px 32px; box-shadow: 0 4px 16px rgba(0,0,0,0.04); }
+        .hint { font-size: 0.88rem; color: var(--text-light); margin: 0 0 22px 0; line-height: 1.5; }
+        .day-row { display: grid; grid-template-columns: 120px 1fr; gap: 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid #F5F0E8; }
+        .day-row:last-of-type { border-bottom: none; }
+        .day-name { font-weight: 700; font-size: 0.95rem; }
+        .day-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+        .day-controls label.check { display: flex; align-items: center; gap: 8px; font-size: 0.9rem; cursor: pointer; }
+        .day-controls input[type="time"] { padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; font-family: var(--body-font); }
+        .btn-save { margin-top: 26px; width: 100%; background: var(--accent-gold); color: #fff; border: none; padding: 14px; border-radius: 10px; font-family: var(--body-font); font-size: 1rem; font-weight: 700; cursor: pointer; transition: all 0.3s; }
+        .btn-save:hover { background: #9A7338; }
+        @media (max-width: 600px) {
+            .day-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="nav-bar">
+        <a href="{% url 'home' %}" class="nav-brand">Hair By Lasheka</a>
+        <div class="nav-links">
+            <a href="{% url 'home' %}" class="nav-glass-btn">Home</a>
+            <a href="{% url 'catalog' %}" class="nav-glass-btn">Services</a>
+            <a href="{% url 'my_appointments' %}" class="nav-glass-btn">Appointments</a>
+            {% if user.is_staff %}
+            <a href="{% url 'staff_working_hours' %}" class="nav-glass-btn" style="background: rgba(255,255,255,0.2);">My hours</a>
+            <a href="{% url 'reports_panel' %}" class="nav-glass-btn">Reports</a>
+            {% endif %}
+            <span class="nav-glass-btn" style="cursor: default;">{{ user.username }}</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>My working hours</h1>
+            <p>Set when you’re available for hairdressing appointments.</p>
+        </div>
+
+        {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+            <li class="{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <div class="card">
+            <p class="hint">
+                Clients only see times that fall inside at least one staff member’s hours (30-minute slots).
+                Until a staff member saves hours here, the site uses the default Mon–Sat schedule.
+                Sundays are closed by default—uncheck or set hours if you work Sundays.
+            </p>
+            <form method="post" action="{% url 'staff_working_hours' %}">
+                {% csrf_token %}
+                {% for item in schedule_rows %}
+                {% with row=item.row %}
+                <div class="day-row">
+                    <div class="day-name">{{ item.label }}</div>
+                    <div class="day-controls">
+                        <label class="check">
+                            <input type="checkbox" name="working_{{ row.weekday }}" value="1"
+                                {% if row.is_working %}checked{% endif %}>
+                            Working
+                        </label>
+                        <input type="time" name="opens_{{ row.weekday }}"
+                            value="{% if row.opens_at %}{{ row.opens_at|time:'H:i' }}{% endif %}"
+                            aria-label="{{ item.label }} opens">
+                        <span style="color: var(--text-light);">to</span>
+                        <input type="time" name="closes_{{ row.weekday }}"
+                            value="{% if row.closes_at %}{{ row.closes_at|time:'H:i' }}{% endif %}"
+                            aria-label="{{ item.label }} closes">
+                    </div>
+                </div>
+                {% endwith %}
+                {% endfor %}
+                <button type="submit" class="btn-save">Save working hours</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

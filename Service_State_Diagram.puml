@@ -1,0 +1,30 @@
+@startuml
+!theme plain
+hide empty description
+title Service — State Diagram
+
+[*] --> Active : Admin creates new service\n[Django Admin panel]\nis_active = True (default)
+
+state Active {
+    Active : is_active = True\nDisplayed in service catalog\nClients can book this service\nIncluded in availability checks
+}
+
+Active --> Deactivated : Admin sets is_active = False\n[Django Admin panel]
+
+state Deactivated {
+    Deactivated : is_active = False\nHidden from service catalog\nClients cannot book this service\nExisting appointments for this\nservice are NOT affected
+}
+
+Deactivated --> Active : Admin sets is_active = True\n[Restored to catalog]
+
+Active --> Deleted : Admin deletes the service\n[on_delete=CASCADE applies]\nAll linked Appointment records\nare also permanently deleted
+
+Deactivated --> Deleted : Admin deletes the service\n[on_delete=CASCADE applies]
+
+state Deleted {
+    Deleted : Permanently removed from DB\nAll linked appointments deleted\nCannot be recovered
+}
+
+Deleted --> [*]
+
+@enduml

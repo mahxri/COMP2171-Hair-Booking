@@ -1,0 +1,44 @@
+@startuml
+!theme plain
+hide empty description
+title Appointment — State Diagram
+
+[*] --> PendingBooking : Client fills booking form\n(Step A: date, time, phone selected)
+
+state PendingBooking {
+    PendingBooking : Stored in session only\nNOT saved to the database yet
+}
+
+PendingBooking --> SummaryReview : Client redirected to\nbooking_summary view
+PendingBooking --> [*] : Session abandoned / expires
+
+state SummaryReview {
+    SummaryReview : Client reviews details\nand enters email address
+}
+
+SummaryReview --> PendingBooking : Client clicks "Edit"\n[Returns to book_service view]
+
+SummaryReview --> Confirmed : Client clicks "Confirm"\n[No time conflict detected]\nAppointment saved to DB\nstatus = 'confirmed'\nConfirmation email sent
+
+SummaryReview --> SummaryReview : Time slot conflict detected\n[Another booking took the same slot]\nError message shown
+
+state Confirmed {
+    Confirmed : status = 'confirmed'\nRecord exists in database\nEmail notification sent to client
+}
+
+Confirmed --> Cancelled : Client clicks "Cancel"\n[cancel_appointment view called]\nCancellation email sent
+
+Confirmed --> Completed : Appointment date passes\n[Implicit - date < today]
+
+state Cancelled {
+    Cancelled : Appointment deleted from DB\nTime slot freed for rebooking\nCancellation email sent
+}
+
+state Completed {
+    Completed : Appointment date has passed\nAvailable in staff reports
+}
+
+Cancelled --> [*]
+Completed --> [*]
+
+@enduml

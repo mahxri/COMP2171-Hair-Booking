@@ -1,0 +1,43 @@
+@startuml
+!theme plain
+hide empty description
+title User Account — State Diagram
+
+[*] --> Unregistered : New visitor arrives at site
+
+state Unregistered {
+    Unregistered : No account exists\nCan only browse the service catalog
+}
+
+Unregistered --> Registered : Submits registration form\n[register_request view]\nCustomUserCreationForm valid\nUser saved to DB\nAuto-logged in via login(request, user)
+
+state Registered {
+    Registered : Account exists in database\nEmail saved to User model
+}
+
+Registered --> LoggedIn : Submits login form\n[Django built-in auth]\n[Credentials valid]
+
+Registered --> Registered : Login attempted\n[Invalid credentials]\nError shown
+
+state LoggedIn {
+    LoggedIn : is_authenticated = True\nCan book appointments\nCan view My Appointments\nCan cancel appointments
+}
+
+LoggedIn --> StaffLoggedIn : [user.is_staff = True\nOR user.is_superuser = True]
+
+state StaffLoggedIn {
+    StaffLoggedIn : All client permissions PLUS:\nCan access Reports Panel\nCan download Excel/PDF reports\nCan filter appointments by date/service/client
+}
+
+LoggedIn --> LoggedOut : Clicks "Logout"\n[Django built-in auth logout]
+
+StaffLoggedIn --> LoggedOut : Clicks "Logout"
+
+state LoggedOut {
+    LoggedOut : Session cleared\nNo longer authenticated\nRedirected to login page
+}
+
+LoggedOut --> LoggedIn : Logs back in\n[Credentials valid]
+LoggedOut --> [*] : Leaves the site
+
+@enduml

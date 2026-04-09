@@ -285,6 +285,7 @@
                 <a href="{% url 'my_appointments' %}" class="nav-glass-btn">Appointments</a>
                 {% if user.is_staff %}
                 <a href="{% url 'staff_working_hours' %}" class="nav-glass-btn">My hours</a>
+                <a href="{% url 'reports_panel' %}" class="nav-glass-btn">Reports</a>
                 {% endif %}
                 <div class="user-menu-container">
                     <button onclick="toggleDropdown()" class="nav-glass-btn" style="cursor: pointer; border: 1px solid rgba(255, 255, 255, 0.15);">

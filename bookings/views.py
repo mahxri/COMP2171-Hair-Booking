@@ -1,4 +1,6 @@
+import csv
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.utils.dateparse import parse_time
@@ -478,6 +480,80 @@ def staff_working_hours(request):
     return render(request, 'catalog/staff_working_hours.html', {
         'schedule_rows': schedule_rows,
     })
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# REPORTS PANEL (View Appointment Reports)
+# ─────────────────────────────────────────────────────────────────────────────
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def reports_panel(request):
+    """
+    Staff/Admin view to generate reports on appointments based on date, service, and client.
+    Handles 'excel' (csv export) and print viewing for 'pdf' downloads.
+    """
+    start_date = request.GET.get('start_date', '')
+    end_date = request.GET.get('end_date', '')
+    service_id = request.GET.get('service_id', '')
+    client_search = request.GET.get('client_search', '')
+    
+    # Base Queryset
+    appointments = Appointment.objects.all().select_related('user', 'service').order_by('-date', '-start_time')
+    
+    # Apply Filters
+    if start_date:
+        appointments = appointments.filter(date__gte=start_date)
+    if end_date:
+        appointments = appointments.filter(date__lte=end_date)
+    if service_id:
+        appointments = appointments.filter(service_id=service_id)
+    if client_search:
+        appointments = appointments.filter(user__username__icontains=client_search)
+        
+    all_services = Service.objects.all()
+    
+    # Define Download Behavior
+    download_format = request.GET.get('download')
+    
+    if download_format == 'excel':
+        # Output pure CSV
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="appointment_report.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['Date', 'Time', 'Client', 'Service', 'Price', 'Status'])
+        
+        for appt in appointments:
+            writer.writerow([
+                appt.date.strftime("%b %d, %Y"),
+                appt.start_time.strftime("%I:%M %p"),
+                appt.user.username,
+                appt.service.name,
+                f"${appt.service.price}",
+                appt.get_status_display()
+            ])
+            
+        return response
+    
+    if download_format == 'pdf':
+        # Simple browser print approach, renders template and prompts print
+        return render(request, 'catalog/reports_print.html', {
+            'appointments': appointments,
+            'start_date': start_date,
+            'end_date': end_date,
+        })
+        
+    context = {
+        'appointments': appointments,
+        'start_date': start_date,
+        'end_date': end_date,
+        'service_id': service_id,
+        'client_search': client_search,
+        'all_services': all_services,
+    }
+    
+    return render(request, 'catalog/reports_panel.html', context)
 
 
 # ─────────────────────────────────────────────────────────────────────────────

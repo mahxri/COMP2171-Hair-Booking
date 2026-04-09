@@ -143,6 +143,7 @@
             {% endif %}
             {% if user.is_staff %}
             <a href="{% url 'staff_working_hours' %}" class="nav-glass-btn">My hours</a>
+            <a href="{% url 'reports_panel' %}" class="nav-glass-btn">Reports</a>
             {% endif %}
             <span class="nav-glass-btn" style="cursor: default;">{{ user.username }}</span>
         </div>

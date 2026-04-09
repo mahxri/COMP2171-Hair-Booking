@@ -52,6 +52,10 @@
             <a href="{% url 'home' %}" class="nav-glass-btn">Home</a>
             <a href="{% url 'catalog' %}" class="nav-glass-btn">Services</a>
             <a href="{% url 'my_appointments' %}" class="nav-glass-btn">Appointments</a>
+            {% if user.is_staff %}
+            <a href="{% url 'staff_working_hours' %}" class="nav-glass-btn" style="background: rgba(255,255,255,0.2);">My hours</a>
+            <a href="{% url 'reports_panel' %}" class="nav-glass-btn">Reports</a>
+            {% endif %}
             <span class="nav-glass-btn" style="cursor: default;">{{ user.username }}</span>
         </div>
     </nav>

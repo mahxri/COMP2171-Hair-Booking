@@ -17,6 +17,7 @@ urlpatterns = [
 
     # Staff
     path('staff/working-hours/', views.staff_working_hours, name='staff_working_hours'),
+    path('reports/', views.reports_panel, name='reports_panel'),
 
     # Authentication
     path('register/', views.register_request, name='register'),

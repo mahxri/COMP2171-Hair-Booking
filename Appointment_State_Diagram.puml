@@ -13,7 +13,7 @@ PendingBooking --> SummaryReview : Client redirected to\nbooking_summary view
 PendingBooking --> [*] : Session abandoned / expires
 
 state SummaryReview {
-    SummaryReview:
+    SummaryReview: Client reviews appointment details before final confirmation
 }
 
 SummaryReview --> PendingBooking : Client clicks "Edit"\n[Returns to book_service view]

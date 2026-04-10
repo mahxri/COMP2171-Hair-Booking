@@ -1,5 +1,7 @@
 @startuml Login_Object_Diagram
 !theme plain
+hide empty description
+title Object Diagram: Login
 
 ' 1. The Request Object (what the user submitted)
 object "loginReq1 : AuthRequest" as req {

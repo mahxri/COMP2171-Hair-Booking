@@ -1,5 +1,7 @@
 @startuml Manage_Service_Catalog_Object_Diagram
 !theme plain
+hide empty description
+title Object Diagram: Manage Service Catalog
 
 ' 1. The logged-in Staff Member/Admin
 object "admin1 : User" as admin {

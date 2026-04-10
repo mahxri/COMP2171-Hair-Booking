@@ -1,5 +1,7 @@
 @startuml Service_Catalog_Object_Diagram
 !theme plain
+hide empty description
+title Object Diagram: Service Catalog
 
 ' 1. The Client interacting with the catalog
 object "client1 : User" as client {

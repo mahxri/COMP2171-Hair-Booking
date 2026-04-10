@@ -1,5 +1,7 @@
 @startuml Book_Appointment_Object_Diagram
 !theme plain
+hide empty description
+title Object Diagram: Book Appointment
 
 ' 1. The logged-in Client
 object "client1 : User" as client {

@@ -49,7 +49,6 @@ def register_request(request):
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            # Save email to the User model (Improvement B)
             user.email = form.cleaned_data.get('email', '')
             user.save()
             login(request, user)
@@ -59,11 +58,10 @@ def register_request(request):
     return render(request, "catalog/register.html", {"form": form})
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# BOOKING FLOW — STEP A: Choose date / time / phone / requests
-# ─────────────────────────────────────────────────────────────────────────────
 
-# Month rendered on the booking calendar (catalog/book.html); keep in sync.
+
+
+
 _BOOKING_CALENDAR_YEAR = 2026
 _BOOKING_CALENDAR_MONTH = 4
 
@@ -157,10 +155,6 @@ def _get_reschedule_for_booking(request, service_id):
 
 @login_required
 def book_service(request, service_id):
-    """
-    Step A — Shows the booking form (date, time, phone, special requests).
-    On POST, saves validated data to the session and redirects to the summary.
-    """
     service = get_object_or_404(Service, id=service_id)
     reschedule_appointment, exclude_appt_id = _get_reschedule_for_booking(
         request, service_id
@@ -231,7 +225,6 @@ def book_service(request, service_id):
                         'That time overlaps another appointment. Please choose a different slot.',
                     )
                 else:
-                    # Store in session — NOT saved to DB yet
                     pending = {
                         'service_id': service_id,
                         'date':       selected_date,
@@ -278,7 +271,6 @@ def booking_summary(request):
         action = request.POST.get('action')
 
         if action == 'edit':
-            # Return user to the booking form; session data stays intact
             url = reverse('book_service', kwargs={'service_id': service.id})
             rid = pending.get('reschedule_appointment_id')
             if rid:
@@ -288,7 +280,6 @@ def booking_summary(request):
         if action == 'confirm':
             client_email = request.POST.get('email', '').strip()
 
-            # Parse date/time from session
             parsed_date = datetime.strptime(pending['date'], "%Y-%m-%d").date()
             parsed_time = datetime.strptime(pending['time'], "%I:%M %p").time()
 
@@ -364,7 +355,7 @@ def booking_summary(request):
             if 'reschedule_appointment_id' in request.session:
                 del request.session['reschedule_appointment_id']
 
-            # Send HTML confirmation email (Improvement C)
+            # Send HTML confirmation email 
             email_sent = False
             if client_email:
                 email_sent = _send_confirmation_email(request, appointment, service, client_email)
@@ -376,7 +367,7 @@ def booking_summary(request):
                 'client_email': client_email,
             })
 
-    # GET — display the summary page; pre-fill email from user's profile (Improvement B)
+
     return render(request, 'catalog/booking_summary.html', {
         'service':    service,
         'pending':    pending,
@@ -385,7 +376,7 @@ def booking_summary(request):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# MY APPOINTMENTS — view + cancel (Improvement D)
+# MY APPOINTMENTS — view + cancel 
 # ─────────────────────────────────────────────────────────────────────────────
 
 @login_required
@@ -557,7 +548,7 @@ def reports_panel(request):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# EMAIL HELPERS (Improvement C — HTML email via EmailMultiAlternatives)
+# EMAIL HELPERS 
 # ─────────────────────────────────────────────────────────────────────────────
 
 def _send_confirmation_email(request, appointment, service, client_email):

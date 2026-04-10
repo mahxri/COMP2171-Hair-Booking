@@ -1,4 +1,4 @@
-@startuml
+@startuml View_Appointment_Reports_Object_Diagram
 !theme plain
 
 ' 1. Logged in Staff Member
@@ -36,7 +36,7 @@ object "appData2 : Appointment" as app2 {
 object "monthlySummary : ReportDocument" as report {
   title = "April 2026 Bookings"
   total_appointments = 142
-  total_revenue = "$6,500"
+  total_revenue = "$1,000,000"
   generated_at = "2026-04-08 21:00"
   is_ready_for_download = true
 }

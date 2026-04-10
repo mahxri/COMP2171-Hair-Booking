@@ -1,4 +1,4 @@
-@startuml
+@startuml Service_Catalog_Object_Diagram
 !theme plain
 
 ' 1. The Client interacting with the catalog
@@ -18,10 +18,10 @@ object "catalogView : ServiceCatalogPage" as view {
 ' 3. Instances of Services available for booking
 object "service1 : Service" as haircut {
   service_id = 101
-  name = "Men's Haircut"
-  description = "A standard men's haircut with scissors or clippers."
-  price = "$30.00"
-  duration = "45 mins"
+  name = "Box Braids"
+  description = "Three-strand plaits divided by small, square-shaped"
+  price = "$5000.00"
+  duration = "120 mins"
   is_active = true
 }
 

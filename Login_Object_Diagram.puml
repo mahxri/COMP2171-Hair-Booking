@@ -1,0 +1,41 @@
+@startuml Login_Object_Diagram
+!theme plain
+
+' 1. The Request Object (what the user submitted)
+object "loginReq1 : AuthRequest" as req {
+  entered_email = "client@example.com"
+  entered_password = "*****"
+  timestamp = "2026-04-08 10:05:22"
+}
+
+' 2. The User Object (the account found in the database)
+object "client1 : User" as user {
+  id = 409
+  email = "client@example.com"
+  password_hash = "$2b$12$Kix..."
+  role = "Client"
+  status = "Active"
+}
+
+' 3. The Session Object (representing their "access to features")
+object "activeSession : UserSession" as session {
+  session_token = "eyJhbGciOiJIUz..."
+  access_level = "Client_Privileges"
+  login_time = "10:05:23"
+  expires_in = "2 hours"
+  is_valid = true
+}
+
+' Relationships showing how the objects interact in this snapshot
+req --> user : " credentials match >"
+req --> session : " triggers creation of >"
+session --> user : " belongs to >"
+
+note right of session
+  **Post-condition met:**
+  User is logged in and was issued 
+  a token granting them access
+  appropriate for their role.
+end note
+
+@enduml

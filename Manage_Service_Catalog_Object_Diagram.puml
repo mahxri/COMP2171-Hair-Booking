@@ -1,4 +1,4 @@
-@startuml
+@startuml Manage_Service_Catalog_Object_Diagram
 !theme plain
 
 ' 1. The logged-in Staff Member/Admin
@@ -16,17 +16,17 @@ object "managePanel : AdminDashboard" as panel {
 
 ' 3. A newly added Service 
 object "service104 : Service" as active_service {
-  name = "Keratin Treatment"
-  price = "$150.00"
+  name = "Two Strand Twists"
+  price = "$3000.00"
   duration = "90 mins"
   is_active = true
 }
 
 ' 4. An edited/deactivated Service (Preserving historical records)
 object "service101 : Service" as old_service {
-  name = "Basic Trimming (Old Pricing)"
-  price = "$20.00"
-  duration = "30 mins"
+  name = "Plaits (Old Pricing)"
+  price = "$2500.00"
+  duration = "120 mins"
   is_active = false
   deactivation_date = "2026-04-08"
 }

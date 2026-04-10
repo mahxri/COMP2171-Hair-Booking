@@ -1,4 +1,4 @@
-@startuml
+@startuml Book_Appointment_Object_Diagram
 !theme plain
 
 ' 1. The logged-in Client

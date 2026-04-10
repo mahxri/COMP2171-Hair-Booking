@@ -1,0 +1,85 @@
+@startuml Manage_Appointment_Object_Diagram
+!theme plain
+hide empty description
+title Object Diagram: Manage Appointment (Cancel & Reschedule)
+
+' Representing the Client's Session and User instance
+object "clientSession : HttpRequest.session" as session {
+    session_key = "xyz789 sessionKey"
+    user_id = 42
+    reschedule_appointment_id = 105
+    pending_booking = "{'date': '2026-05-12', 'time': '10:00 AM', ...}"
+}
+
+object "clientUser : User" as client {
+    id = 42
+    username = "jane_doe"
+    email = "jane@example.com"
+}
+
+' Representing Data Models
+object "existingAppointment : Appointment" as appt {
+    id = 105
+    status = "confirmed"
+    date = "2026-05-10"
+    start_time = "14:00"
+    user_id = 42
+    service_id = 3
+}
+
+object "chosenService : Service" as service {
+    id = 3
+    name = "Bantu Knots"
+    duration_minutes = 120
+    price = $5000.00
+}
+
+' Representing View Controllers
+object "cancel_appointment : View" as cancel_view {
+    url = "/appointments/cancel/105/"
+    action = "delete()"
+}
+
+object "book_service : View" as book_view {
+    url = "/catalog/service/3/book/?reschedule=105"
+    action = "Create pending_booking session"
+}
+
+object "booking_summary : View" as summary_view {
+    url = "/catalog/booking/summary/"
+    action = "Update Appointment record"
+}
+
+' Representing the Email generation objects
+object "cancellationMessage : EmailMultiAlternatives" as cancel_email {
+    subject = "Appointment Cancelled Bantu Knots"
+    to = "jane@example.com"
+}
+
+object "confirmationMessage : EmailMultiAlternatives" as confirm_email {
+    subject = "Booking Confirmation Bantu Knots"
+    to = "jane@example.com"
+}
+
+' Structural Relationships
+client -r- session : "Owns"
+appt -d- client : "user"
+appt -r- service : "service"
+
+' 1. The Cancel Flow
+session ..> cancel_view : "[CANCEL SCENARIO]"
+cancel_view ..> appt : "get_object_or_404()\nappt.delete()"
+cancel_view ..> cancel_email : "_send_cancellation_email()"
+
+' 2. The Reschedule Flow (Step A)
+session ..> book_view : "[RESCHEDULE SCENARIO]"
+book_view ..> session : "Sets pending_booking\nVerifies no schedule conflict"
+book_view ..> appt : "Uses exclude_id=105\nduring conflict checks"
+
+' 3. The Reschedule Flow (Step B - Confirmation)
+book_view ..> summary_view : "Client submits form"
+summary_view ..> session : "Reads & clears pending_booking"
+summary_view ..> appt : "Updates date & time\nappt.save()"
+summary_view ..> confirm_email : "_send_confirmation_email()"
+
+@enduml

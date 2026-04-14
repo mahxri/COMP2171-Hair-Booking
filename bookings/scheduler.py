@@ -1,13 +1,3 @@
-"""
-Improvement A — Daily Reminder Emails via APScheduler.
-
-This module is imported in BookingsConfig.ready() so the scheduler
-starts automatically when Django starts (with the dev server or in production).
-
-The scheduler sends a reminder email to every user who has an appointment
-scheduled for tomorrow.
-"""
-
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
 from django_apscheduler.jobstores import DjangoJobStore
@@ -26,7 +16,6 @@ def send_reminder_emails():
     Queries all confirmed appointments happening tomorrow and sends each
     client a reminder email if an email address is stored on the appointment.
     """
-    # Import here to avoid calling the ORM before Django is ready
     from .models import Appointment
 
     tomorrow = timezone.now().date() + timezone.timedelta(days=1)
